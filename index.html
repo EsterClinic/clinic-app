@@ -1,0 +1,2558 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול קליניקה</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+        /* === משתנים ועיצוב בסיסי === */
+        :root {
+            --primary-color: #3a7d8c; 
+            --secondary-color: #475569; 
+            --mustard-color: #eab348; 
+            --light-accent: #f1f5f9; 
+            --app-bg: #fffdfc; 
+            --card-bg: #ffffff; 
+            --text-main: #475569;
+            --danger: #ef4444;
+            --success: #eab348; 
+        }
+        
+        body { font-family: 'Rubik', sans-serif; background-color: var(--app-bg); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 80px; overflow-x: hidden; transition: background-color 0.3s; }
+        .container { max-width: 650px; margin: auto; padding: 15px; box-sizing: border-box; position: relative; }
+        
+        h2, h3 { color: var(--secondary-color); margin: 0; transition: color 0.3s; }
+        h4 { margin: 0 0 5px 0; color: var(--secondary-color); font-size: 14px; transition: color 0.3s; }
+        
+        input, textarea, select { width: 100%; padding: 14px; margin-top: 5px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; border: 2px solid var(--light-accent); border-radius: 15px; background-color: var(--card-bg); font-family: 'Rubik', sans-serif; transition: 0.2s;}
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--mustard-color); } 
+        
+        button, .btn-link-style { width: 100%; background-color: var(--secondary-color); color: white; border: none; cursor: pointer; border-radius: 18px; font-weight: 700; font-size: 17px; padding: 15px; margin-top: 10px; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0, 0.1); text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
+        button:hover, .btn-link-style:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0, 0.2); }
+        
+        .btn-success { background-color: var(--mustard-color); color: white;} 
+        .btn-danger { background-color: var(--danger); }
+        .btn-raw { background-color: #f1f5f9; color: var(--text-main); border: 2px solid #cbd5e1; box-shadow: none; }
+        
+        .btn-ai { background-color: #fffbeb; color: #b45309; border: 2px dashed var(--mustard-color); box-shadow: none; font-size: 15px; padding: 12px; font-weight: bold; }
+        .btn-ai:hover { background-color: #fef3c7; }
+        
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .btn-small { width: auto; padding: 8px 14px; border-radius: 12px; font-size: 14px; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 5px; margin: 0; text-decoration: none; box-shadow: none; cursor: pointer; border:none;}
+        .btn-back { background-color: #f1f5f9; color: var(--text-main); border: 1px solid #cbd5e1; }
+        .btn-call { background-color: #10b981; color: white; }
+        .btn-wa { background-color: #25d366; color: white; }
+        .btn-email { background-color: var(--mustard-color); color: white; }
+        .btn-edit { background-color: var(--mustard-color); color: white; padding: 5px 10px; border-radius: 8px; font-size: 12px; width: auto; margin:0;}
+        .btn-subtle-delete { background: transparent; color: var(--danger); border: none; font-size: 13px; font-weight: bold; width: auto; padding: 5px; margin: 0; box-shadow: none; cursor: pointer; text-decoration: underline; }
+
+        .view-screen { display: none; animation: fadeIn 0.3s; } 
+        .active-screen { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; border-top: 1px solid var(--light-accent); z-index: 999; }
+        .nav-item { flex: 1; padding: 12px 0; text-align: center; font-size: 14px; font-weight: 700; color: #94a3b8; cursor: pointer; transition: 0.2s;}
+        .nav-item.active { color: var(--secondary-color); border-bottom: 3px solid var(--secondary-color); background: #fffcfc; }
+        
+        .action-box { background: var(--card-bg); border: 2px solid var(--light-accent); padding: 20px; border-radius: 20px; margin-top: 15px; }
+        .action-box h3 { border-bottom: 2px solid var(--light-accent); padding-bottom: 10px; margin-bottom: 15px; font-size: 18px; }
+
+        .list-item { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 2px solid var(--light-accent); margin-bottom: 10px; cursor: pointer; font-size: 16px; font-weight: 700; color: var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .list-item.archive { opacity: 0.7; background: var(--app-bg); border-color: #cbd5e1; color: var(--text-main); }
+        .search-bar { background: var(--card-bg) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>') no-repeat 15px center; padding-right: 40px; margin-bottom: 15px; }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        
+        .patient-menu-card { background: var(--card-bg); border: 2px solid var(--light-accent); border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100px; position: relative;}
+        .patient-menu-card:hover { border-color: var(--mustard-color); background-color: #fffcfc; transform: translateY(-2px); }
+        .patient-menu-card.full-width { grid-column: span 2; min-height: 80px; flex-direction: row; gap: 15px; }
+        .p-icon { font-size: 28px; margin-bottom: 5px; }
+        .p-text { font-size: 14px; font-weight: 800; color: var(--secondary-color); }
+        .patient-section { display: none; margin-top: 15px; }
+
+        .session-item { background: var(--app-bg); margin-top: 10px; padding: 15px; border-radius: 15px; border-right: 5px solid var(--mustard-color); border: 1px solid #f1f5f9; position: relative;}
+        details.session-item summary { font-weight: bold; color: var(--secondary-color); outline: none; cursor: pointer; list-style: none; }
+        details.session-item summary::-webkit-details-marker { display: none; }
+        details.session-item summary::after { content: ' ▼'; font-size: 12px; color: #94a3b8; margin-right: 5px; }
+        details.session-item[open] summary::after { content: ' ▲'; }
+        
+        .expense-img { max-width: 100%; max-height: 200px; border-radius: 10px; margin-top: 10px; border: 1px solid #cbd5e1; display: block; }
+        .cam-btn-wrap { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .cam-btn-wrap input[type=file] { position: absolute; left: 0; top: 0; opacity: 0; height: 100%; width: 100%; cursor: pointer; }
+
+        .ex-card { background: var(--card-bg); border: 2px solid var(--light-accent); border-radius: 15px; padding: 10px; text-align: center; position: relative; }
+        .ex-img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; background: #f1f5f9; margin-bottom: 8px; }
+        .ex-actions { position: absolute; top: 5px; left: 5px; display: flex; gap: 5px; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; overflow-y: auto; }
+        .modal-content { background: var(--card-bg); margin: 5% auto; padding: 20px; border-radius: 20px; width: 90%; max-width: 550px; position: relative;}
+        
+        .dash-row { display: flex; gap: 10px; margin-top: 10px; }
+        .dash-card { flex: 1; background: var(--card-bg); padding: 15px 5px; border-radius: 15px; border: 2px solid var(--light-accent); text-align: center; }
+        .dash-val { font-size: 22px; font-weight: 900; color: var(--mustard-color); display: block; margin-bottom: 5px; }
+        .dash-lbl { font-size: 12px; color: #64748b; font-weight: bold; }
+        .dash-alert { background: #fef2f2; border-color: #fecaca; cursor: pointer; transition: 0.2s;}
+        .dash-alert:hover { background: #fee2e2; }
+        .dash-alert .dash-val { color: var(--danger); }
+        .dash-clickable { cursor: pointer; transition: 0.2s; }
+        .dash-clickable:hover { background: #fffcfc; }
+        
+        .ai-spinner { display: inline-block; width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<!-- מסך התקנון / כניסה ראשונית -->
+<div id="tosModal" class="modal" style="background: rgba(15, 23, 42, 0.95); z-index: 99999;">
+    <div class="modal-content" style="text-align: center; border: 4px solid var(--primary-color); margin-top: 10%;">
+        <h2 style="color: var(--primary-color); font-size: 26px; margin-bottom:15px;">ברוכים הבאים למערכת! 👋</h2>
+        <p style="font-size: 15px; line-height: 1.6; text-align: right; margin-bottom: 15px;">
+            תוכנה זו הינה רכוש אישי ובלעדי של המפתחת. 
+            <br><br>
+            <strong>אין להעביר, להעתיק או לשכפל אותה בשום אופן</strong> למי שלא רכש אותה כדין. 
+            <br><br>
+            לקבלת חודש ניסיון בחינם ולפרטים נוספים לגבי רכישה, יש לפנות ל<strong>אסתר בן פורת</strong>:
+            <br>📱 טלפון: 054-6703332
+            <br>📧 מייל: esterayelet@gmail.com
+        </p>
+        <button class="btn-primary" style="background:var(--primary-color); color:white; font-size:18px; width: 100%; border: none; border-radius: 15px; padding: 15px; font-weight: bold; cursor: pointer;" onclick="acceptToS()">הבנתי ואני מאשר/ת</button>
+    </div>
+</div>
+
+<div id="aiLoadingModal" class="modal" style="z-index: 99999; background: rgba(13, 148, 136, 0.9);">
+    <div class="modal-content" style="background: transparent; border: none; box-shadow: none; text-align: center; color: white; margin-top: 50%;">
+        <div class="ai-spinner"></div>
+        <h2 id="aiLoadingText" style="color: white; font-weight: 900;">הבינה המלאכותית חושבת...</h2>
+        <p>זה עשוי לקחת כמה שניות.</p>
+    </div>
+</div>
+
+<!-- חלון בחירת פורמט הורדה (ללא אקסל) -->
+<div id="exportModal" class="modal" style="z-index: 4000;">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h3 style="color:var(--primary-color); margin-bottom:5px;">📥 בחירת פורמט הורדה</h3>
+        <p style="font-size:14px; color:#64748b; margin-bottom:20px;">באיזה קובץ תרצי לשמור את הדוח?</p>
+        
+        <button class="btn-success" style="background:#ef4444; margin-bottom:10px;" onclick="executeExport('pdf')">📄 שמירה כ-PDF (או הדפסה)</button>
+        <button class="btn-success" style="background:#2563eb; margin-bottom:10px;" onclick="executeExport('word')">📝 קובץ Word (לצורך עריכה)</button>
+        
+        <button class="btn-raw" style="margin-top:10px;" onclick="closeModal('exportModal')">ביטול</button>
+    </div>
+</div>
+
+<!-- חלון מעבר בין מכשירים -->
+<div id="transferModal" class="modal" style="z-index: 9999;">
+    <div class="modal-content" style="text-align: center;">
+        <h2 style="color: var(--primary-color);">🔄 מעבר למכשיר אחר</h2>
+        <p style="font-size: 15px; line-height: 1.5; color: var(--text-main);">
+            המידע נשמר על המכשיר הזה בלבד. כדי לעבור לטלפון או מחשב חדש, בצעי 3 שלבים פשוטים:
+        </p>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 15px; text-align: right; margin-bottom: 15px; border: 1px solid #cbd5e1;">
+            <b>1. הורידי את המידע מהמכשיר הנוכחי:</b>
+            <button class="btn-success" style="margin-top: 10px; padding: 10px; font-size: 15px;" onclick="executeDailyBackup()">📥 הורדת קובץ נתונים למכשיר</button>
+            <br>
+            <b>2. העבירי את הקובץ:</b>
+            <p style="font-size: 13px; margin: 5px 0;">שלחי את הקובץ שירד לעצמך בווצאפ או במייל, ופתחי את האפליקציה במכשיר השני.</p>
+            <br>
+            <b>3. טעני את הקובץ במכשיר החדש:</b>
+            <div class="cam-btn-wrap" style="margin-top: 5px;">
+                <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed; border-color:#3a7d8c; color:#3a7d8c; background:#e0f2fe;">🔄 לחצי כאן להעלאת הקובץ</button>
+                <input type="file" accept=".json,application/json,text/plain,*/*" onchange="restoreBackupFromFile(this)">
+            </div>
+        </div>
+        <button class="btn-raw" onclick="closeModal('transferModal')">סגירה</button>
+    </div>
+</div>
+
+<div id="appWrapper">
+    <div id="accountingListModal" class="modal" style="z-index:3000;">
+        <div class="modal-content">
+            <h3 id="accListTitle" style="color:var(--secondary-color); margin-bottom:15px; border-bottom:2px solid var(--light-accent); padding-bottom:10px;"></h3>
+            <div id="accListContainer" style="max-height:300px; overflow-y:auto; margin-bottom:15px; background:#f8fafc; border-radius:10px; padding:10px; border:1px solid #cbd5e1;"></div>
+            <button class="btn-raw" onclick="closeModal('accountingListModal')">סגירה</button>
+        </div>
+    </div>
+
+    <div id="editSessionModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom:15px; color:var(--secondary-color);">✏️ עריכת תיעוד ישן</h3>
+            <label>תאריך:</label>
+            <input type="date" id="editSessionDate">
+            <label>מספר/תיאור מפגש (למשל: '3 מתוך 12'):</label>
+            <input type="text" id="editSessionNumber">
+            <label>סוג מפגש:</label>
+            <select id="editSessionType" onchange="checkEditSessionType()">
+                <option value="טיפול">טיפול רגיל</option>
+                <option value="אבחון">אבחון</option>
+                <option value="הדרכה">הדרכת הורים</option>
+                <option value="אינטייק">אינטייק</option>
+                <option value="תצפית במסגרת חינוכית">תצפית במסגרת חינוכית</option>
+                <option value="שיחת הורים">שיחת הורים (טלפוני/זום)</option>
+                <option value="אחר">אחר (הזנה ידנית)</option>
+            </select>
+            <input type="text" id="editSessionTypeOther" placeholder="מה סוג המפגש?" style="display:none; margin-top:5px;">
+            <label>תיעוד הטיפול:</label>
+            <textarea id="editSessionNotes" rows="5"></textarea>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <label style="flex:1; background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="editSessionPaid" style="width:20px; height:20px; margin:0;"> שולם
+                </label>
+                <label style="flex:1; background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="editSessionReceipt" style="width:20px; height:20px; margin:0;"> יצאה קבלה
+                </label>
+            </div>
+            <button class="btn-success" onclick="saveEditedSession()" style="margin-top:20px;">💾 שמירת שינויים</button>
+            <button class="btn-raw" onclick="closeModal('editSessionModal')">ביטול</button>
+        </div>
+    </div>
+
+    <!-- התראת גיבוי מעודנת -->
+    <div id="forcedBackupModal" class="modal" style="background: rgba(13, 148, 136, 0.95); z-index: 9999;">
+        <div class="modal-content" style="text-align: center; border: 4px solid var(--secondary-color); margin-top: 5%;">
+            <h2 style="color: var(--secondary-color); font-size: 24px;">💡 רגע לפני שמתחילים...</h2>
+            <p style="font-size: 15px; margin-bottom: 15px; line-height: 1.5; color: var(--text-main);">
+                המידע הרפואי חשוב! המערכת שומרת הכל בצורה מאובטחת על המכשיר שלך בלבד (לא בענן). <br><br>
+                מומלץ להוריד קובץ גיבוי מדי פעם כדי ששום דבר לא יאבד במקרה של החלפת טלפון או תקלה.
+            </p>
+            <button class="btn-success" style="font-size: 16px; padding: 12px; margin-bottom:10px;" onclick="executeDailyBackup()">📥 הורידי גיבוי עכשיו</button>
+            <button class="btn-raw" style="font-size: 14px; padding: 8px;" onclick="dismissBackup()">הכל טוב, אזכור בהמשך</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <button onclick="openSettingsModal()" style="position: absolute; left: 15px; top: 15px; width: 45px; height: 45px; border-radius: 50%; background: #f1f5f9; color: #475569; padding: 0; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border:1px solid #cbd5e1; z-index: 100;">⚙️</button>
+
+       <div style="text-align: center; margin-bottom: 5px; padding-top: 10px;">
+            <img id="mainLogo" src="" alt="לוגו הקליניקה" style="max-height: 100px; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); display:none;">
+        </div>
+        
+        <!-- מסך מטופלים -->
+        <div id="view-patients" class="view-screen active-screen">
+            <div class="action-bar" style="margin-bottom:15px; justify-content:center;">
+                <button class="btn-raw" style="border-color:var(--primary-color); color:var(--primary-color); font-weight:bold; border-radius:15px; margin-top:0; width:100%;" onclick="openTransferModal()">🔄 גיבוי ומעבר למכשיר אחר</button>
+            </div>
+
+            <div class="action-box" style="margin-top:0; margin-bottom:15px; border-color:#3b82f6; padding:15px; background:#f0fdf4;">
+                <h4 style="color:#166534; margin:0 0 10px 0;">⏰ תזכורות לטיפולים של מחר</h4>
+                <button onclick="generateTomorrowReminders()" class="btn-primary" style="width:100%; padding:10px; background:#22c55e; margin:0; color:white; border:none; border-radius:15px; font-weight:bold; cursor:pointer;">🔍 בדקי טיפולים למחר</button>
+                <div id="tomorrowRemindersContainer" style="margin-top:10px; max-height:150px; overflow-y:auto;"></div>
+            </div>
+            
+            <h3 style="text-align: center; font-size: 24px; font-weight: 900; margin-bottom: 15px;">👥 רשימת מטופלים</h3>
+            <button class="btn-success" style="width: 100%; padding: 15px; font-size: 18px; margin-bottom: 15px; border-radius: 15px;" onclick="openAddPatientModal()">➕ הוספת מטופל חדש</button>
+            <input type="text" id="patientSearch" class="search-bar" placeholder="חיפוש מטופל לפי שם..." onkeyup="renderHomeList()">
+            
+            <div id="activePatientList"></div>
+            <button class="btn-raw" style="border-style:dashed; margin-top:20px; border-radius:15px; width:100%;" onclick="showScreen('view-archive')">🗄️ ארכיון מטופלים</button>
+        </div>
+
+        <!-- מסך ארכיון -->
+        <div id="view-archive" class="view-screen">
+            <div class="action-bar">
+                <button class="btn-small btn-back" onclick="showScreen('view-patients')">🔙 חזרה לרשימת המטופלים</button>
+                <h3 style="margin:0;">🗄️ ארכיון</h3>
+            </div>
+            <input type="text" id="archiveSearch" class="search-bar" placeholder="חיפוש בארכיון..." onkeyup="renderArchiveList()">
+            <div id="archivedPatientList"></div>
+        </div>
+
+        <!-- מסך פרטי מטופל (ראשי) -->
+        <div id="view-patient-detail" class="view-screen">
+            <div class="action-bar" style="margin-bottom: 5px;">
+                <button class="btn-small btn-back" onclick="goBackToPatientsOrArchive()">🔙 חזרה לרשימת המטופלים</button>
+                <div style="display:flex; gap:8px;">
+                    <button id="btnWA" class="btn-small btn-wa" style="display:none;">💬 ווצאפ</button>
+                    <button id="btnEmail" class="btn-small btn-email" style="display:none;">📧 מייל</button>
+                    <a id="btnCall" href="#" class="btn-small btn-call" style="display:none;">📞 חייג</a>
+                </div>
+            </div>
+            
+            <div class="action-box" style="padding-bottom:15px; border-bottom: 4px solid var(--secondary-color); margin-top:10px;">
+                <h2 id="detailName" style="text-align: center; font-size: 26px; font-weight: 900;"></h2>
+                <div class="dash-row" id="detailSummary"></div>
+                
+                <div id="nextPlanAlert" style="display:none; background:#fef3c7; border:1px solid #fde68a; padding:15px; border-radius:12px; margin-top:15px; color:#d97706;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:5px;">
+                        <b style="display:block;">💡 תכנון לטיפול הקרוב:</b>
+                        <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                            <button class="btn-small" style="background:var(--card-bg); border:1px solid #d97706; color:#d97706; font-size:12px;" onclick="transferPlanToSession()">📥 העבר לתיעוד המפגש</button>
+                            <button class="btn-small" style="background:var(--card-bg); border:1px solid #d97706; color:#d97706; font-size:12px;" onclick="openSection('sec-next')">✏️ עריכה</button>
+                            <button class="btn-small" style="background:#d97706; color:white; font-size:12px;" onclick="markPlanDone()">✅ בוצע (מחק)</button>
+                        </div>
+                    </div>
+                    <span id="nextPlanAlertText" style="white-space:pre-wrap; line-height:1.4; font-size:15px;"></span>
+                </div>
+            </div>
+
+            <div id="patientMenuGrid" class="grid-2" style="margin-top:15px;">
+                <div class="patient-menu-card" onclick="openSection('sec-session')"><span class="p-icon">📝</span><span class="p-text">תיעוד מפגש</span></div>
+                <div class="patient-menu-card" onclick="openSection('sec-history')"><span class="p-icon">📚</span><span class="p-text">היסטוריה</span></div>
+                <div class="patient-menu-card" onclick="openSection('sec-practice')"><span class="p-icon">🏠</span><span class="p-text">תרגול ביתי</span></div>
+                <div class="patient-menu-card" onclick="openSection('sec-goals')"><span class="p-icon">🎯</span><span class="p-text">מטרות ודילמות</span></div>
+                <div class="patient-menu-card" onclick="openSection('sec-info')"><span class="p-icon">📋</span><span class="p-text">פרטים אישיים</span></div>
+                <div class="patient-menu-card" onclick="openSection('sec-reports')"><span class="p-icon">🛠️</span><span class="p-text">דוחות AI</span></div>
+                <div class="patient-menu-card full-width" onclick="openSection('sec-next')"><span class="p-icon">💡</span><span class="p-text" style="font-size:16px;">תכנון הטיפול הבא</span></div>
+            </div>
+
+            <!-- לשוניות מטופל -->
+            <div id="sec-session" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0;">
+                    <h3>📝 מפגש חדש</h3>
+                    <div style="display:flex; gap:10px; align-items: flex-end;">
+                        <div style="flex:2;">
+                            <label style="font-size:13px; font-weight:bold;">תאריך:</label>
+                            <input type="date" id="sessionDate" style="margin-bottom:0;">
+                        </div>
+                        <div style="flex:1; position:relative;">
+                            <label style="font-size:13px; font-weight:bold;">טיפול מס':</label>
+                            <input type="number" id="sessionNumber" placeholder="מס'" style="margin-bottom:0;">
+                            <span id="sessionQuotaDisplay" style="position:absolute; bottom:-20px; right:0; font-size:12px; font-weight:bold; color:var(--primary-color);"></span>
+                        </div>
+                    </div>
+                    <div id="sessionEndAlert" style="display:none; color:#ea580c; font-size:13px; font-weight:bold; margin-top:25px; background:#fff7ed; padding:10px; border-radius:10px; border:1px solid #fed7aa; margin-bottom:10px;"></div>
+                    
+                    <select id="sessionType" style="margin-top:25px;" onchange="checkExpensiveSession()">
+                        <option value="טיפול">טיפול רגיל</option>
+                        <option value="אינטייק">אינטייק</option>
+                        <option value="שיחת הורים">שיחת הורים</option>
+                        <option value="אבחון">אבחון</option>
+                        <option value="הדרכה">הדרכת הורים</option>
+                        <option value="תצפית במסגרת חינוכית">תצפית במסגרת חינוכית</option>
+                        <option value="אחר">אחר (הזנה ידנית)</option>
+                    </select>
+                    <input type="text" id="sessionTypeOther" placeholder="פרטי המפגש החריג (למשל: שיחה עם גננת)" style="display:none; margin-top:5px;">
+                    
+                    <div id="expensiveWarning" style="display:none; color:var(--danger); font-size:13px; font-weight:bold; margin-top:5px;">⚠️ שימי לב: סוג מפגש זה מתומחר לרוב בתעריף גבוה יותר.</div>
+                    
+                    <div id="debtWarning" style="display:none; margin-top:15px; padding:10px; background:#fff7ed; border:1px solid #fed7aa; border-radius:10px;">
+                        <span id="debtWarningText" style="color:#ea580c; font-size:13px; font-weight:bold; display:block; margin-bottom:5px;">⚠️ קיימים חובות פתוחים למטופל זה.</span>
+                        <button class="btn-small" style="background:#ea580c; color:white; width:100%; justify-content:center;" onclick="previewDebtReminder()">צפייה ושליחת דוח מצב חשבון</button>
+                    </div>
+
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button class="btn-raw" style="flex:1; background:#e0f2fe; color:#0284c7; margin:0; padding:10px; font-size:14px;" onclick="startDictation('sessionNotes', 'btnVoice')" id="btnVoice">🎤 הקלטה קולית</button>
+                        <button class="btn-ai" style="flex:1; margin:0; padding:10px; font-size:14px;" onclick="improveSessionNotes()">✨ שפר ניסוח (AI)</button>
+                    </div>
+                    <textarea id="sessionNotes" rows="5" placeholder="מה עשינו היום?"></textarea>
+                    
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px; padding:15px; background:var(--app-bg); border-radius:12px; border:1px solid #cbd5e1;">
+                        <div style="display:flex; gap:15px;">
+                            <label style="font-weight:bold; display:flex; align-items:center; gap:5px; flex:1; cursor:pointer;"><input type="checkbox" id="sessionPaid" style="width:20px; height:20px; margin:0;"> שולם</label>
+                            <label style="font-weight:bold; display:flex; align-items:center; gap:5px; flex:1; cursor:pointer;"><input type="checkbox" id="sessionReceipt" style="width:20px; height:20px; margin:0;"> קבלה</label>
+                        </div>
+                        
+                        <div style="margin-top:5px; border-top:1px solid #cbd5e1; padding-top:10px;">
+                            <label style="font-size:14px; font-weight:bold; color:var(--primary-color);">🌐 קישור להנפקת קבלה:</label>
+                            <div style="display:flex; gap:10px; margin-top:5px; align-items:center;">
+                                <select id="receiptWebsiteSelect" style="margin:0; padding:10px; flex:2; font-size:14px;" onchange="handleReceiptWebsiteChange()">
+                                    <option value="https://ypay.co.il/">YPAY</option>
+                                    <option value="https://www.sumit.co.il/">SUMIT</option>
+                                    <option value="https://www.icount.co.il/">iCount</option>
+                                    <option value="https://www.morning.co/">morning</option>
+                                    <option value="other">אחר... (הזנה ידנית)</option>
+                                </select>
+                                <button class="btn-success" style="margin:0; padding:10px; flex:1; font-size:14px; border-radius:12px;" onclick="goToReceiptWebsite()">מעבר לאתר</button>
+                            </div>
+                            <input type="text" id="receiptWebsiteCustomUrl" placeholder="הדביקי כתובת אתר (למשל: www.site.com)" style="display:none; margin-top:5px; padding:10px; font-size:14px;">
+                        </div>
+                    </div>
+                    <button class="btn-success" onclick="saveSession()">💾 שמור תיעוד</button>
+                </div>
+            </div>
+
+            <div id="sec-history" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div id="detailHistory"></div>
+                
+                <div style="display:flex; gap:10px; margin-top:20px; flex-direction:column;">
+                    <button class="btn-raw" style="width:100%; border-color:var(--primary-color); color:var(--primary-color); font-weight:bold;" onclick="showExportOptions('דוח_מפגשים', getSessionHistoryHTML())">📥 הורדת דוח כל התיעודים (כולל סטטוס תשלום)</button>
+                    
+                    <div style="background:#f0fdf4; padding:15px; border-radius:15px; border:2px dashed #22c55e;">
+                        <h4 style="margin:0 0 10px 0; color:#166534;">📄 דוח חודשי נקי (למסגרות חינוך):</h4>
+                        <div style="display:flex; gap:10px;">
+                            <input type="month" id="reportMonthSelect" style="margin:0; flex:2;">
+                            <button class="btn-success" style="margin:0; flex:3; background:#22c55e;" onclick="downloadMonthlySessionHistory()">הורדת דוח תיעודים חודשי</button>
+                        </div>
+                        <small style="display:block; margin-top:5px; color:#64748b;">*דוח זה לא כולל מידע כספי ומתאים לתיוק בתיק המוסדי.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-practice" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0;">
+                    <h3>🏠 תוכנית תרגול</h3>
+                    <button class="btn-success" onclick="openPracticeModal()">📝 בניית תוכנית חדשה</button>
+                </div>
+            </div>
+
+            <div id="sec-goals" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0;">
+                    <h3>🎯 מטרות ודילמות</h3>
+                    <button class="btn-ai" onclick="summarizePatientState()" style="width:100%; margin-top:0; margin-bottom:10px;">✨ הצע תקציר מטרות (AI)</button>
+                    <h4>מטרות הטיפול:</h4>
+                    <textarea id="detailGoalsInput" rows="3" placeholder="הקלידי כאן את המטרות..."></textarea>
+                    <h4 style="margin-top:10px;">דילמות הורים / הערות:</h4>
+                    <textarea id="detailDilemmasInput" rows="3" placeholder="הקלידי כאן דילמות ושאלות..."></textarea>
+                    <button class="btn-success" onclick="saveGoals()">💾 שמור מטרות</button>
+                </div>
+            </div>
+
+            <div id="sec-info" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0; background:#faf9f5;">
+                    <h3>📋 פרטים אישיים וקשר</h3>
+                    <div style="display:flex; gap:10px;">
+                        <div style="flex:1;"><h4>שם פרטי:</h4><input type="text" id="patientFirstNameEdit" placeholder="שם פרטי"></div>
+                        <div style="flex:1;"><h4>שם משפחה:</h4><input type="text" id="patientLastNameEdit" placeholder="שם משפחה"></div>
+                    </div>
+                    <div style="display:flex; gap:10px;"><input type="text" id="patientId" placeholder="ת.ז"><input type="date" id="patientDob"></div>
+                    <input type="tel" id="parentPhone1" placeholder="טלפון הורה 1">
+                    <input type="tel" id="parentPhone2" placeholder="טלפון הורה 2 (אופציונלי)">
+                    <input type="email" id="parentEmail" placeholder="אימייל">
+                    
+                    <div style="display:flex; gap:10px; margin-top:15px; padding-top:15px; border-top:1px dashed #cbd5e1;">
+                        <div style="flex:1;"><label style="font-size:14px; font-weight:bold; color:var(--primary-color);">תעריף קבוע (₪):</label><input type="number" id="patientBasePrice" value="300"></div>
+                        <div style="flex:1;"><label style="font-size:14px; font-weight:bold; color:var(--primary-color);">מכסת טיפולים:</label><input type="number" id="patientTotalSessions" placeholder="למשל 12" oninput="updateSessionQuotaInView()"></div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <div style="flex:1;"><label style="font-size:14px; font-weight:bold; color:var(--primary-color);">סדרה מס':</label><input type="number" id="patientSeriesNumber" placeholder="למשל 1" oninput="updateSessionQuotaInView()"></div>
+                        <div style="flex:1; display:flex; align-items:flex-end;"><button class="btn-success" style="margin:0; padding:12px; font-size:14px; border-radius:10px; background:#ea580c;" onclick="startNewSeries()">➕ התחל סדרה חדשה</button></div>
+                    </div>
+                    
+                    <button class="btn-success" onclick="savePersonalDetails()" style="margin-top: 15px;">💾 שמור פרטים</button>
+                </div>
+                <div class="action-box" style="background:#fff1f2; border-color:#fecaca;">
+                    <h3 style="color:var(--danger); border-bottom:none;">הגדרות מתקדמות</h3>
+                    <button id="btnArchive" class="btn-raw" style="width:100%;" onclick="archivePatient()">📦 סיום טיפול (העברה לארכיון)</button>
+                    <button id="btnUnarchive" class="btn-success" style="display:none; width:100%;" onclick="unarchivePatient()">החזר מטופל לפעילות</button>
+                    <button class="btn-subtle-delete" style="margin-top:25px; display:block; width:100%; text-align:center;" onclick="deletePatient()">מחק תיק לחלוטין</button>
+                </div>
+            </div>
+
+            <div id="sec-reports" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0;">
+                    <h3>🛠️ דוחות בינה מלאכותית</h3>
+                    <button class="btn-ai" onclick="generateSummaryReport()">✨ נסח דוח סיכום טיפול (AI)</button>
+                    <button class="btn-ai" onclick="generateContinuationLetter()">✨ נסח מכתב בקשת המשך (AI)</button>
+                </div>
+            </div>
+
+            <div id="sec-next" class="patient-section">
+                <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
+                <div class="action-box" style="margin-top:0; border-color:#fcd34d;">
+                    <h3 style="color:#d97706; border-bottom-color:#fef3c7;">💡 תכנון הטיפול הבא</h3>
+                    <button class="btn-ai" onclick="suggestNextPlan()" style="width:100%; margin-top:0; margin-bottom:10px;">✨ הצע תכנון מבוסס עבר (AI)</button>
+                    <button class="btn-raw" style="width:100%; background:#e0f2fe; color:#0284c7; margin:0; margin-bottom:10px; padding:10px; font-size:14px; border-color:#bae6fd;" onclick="startDictation('nextPlanInput', 'btnVoiceNext')" id="btnVoiceNext">🎤 הקלטה קולית לתכנון</button>
+                    <textarea id="nextPlanInput" rows="5" placeholder="מה אני רוצה לעשות איתו בפעם הבאה? אילו משחקים להכין?"></textarea>
+                    <button class="btn-success" style="background:#d97706;" onclick="saveNextPlan()">💾 שמור תכנון</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-schedule-days" class="view-screen">
+            <h3 style="text-align: center; font-size: 24px; margin-top:10px;">📅 ימי עבודה</h3>
+            <button class="btn-success" style="width: 100%; padding: 15px; font-size: 18px; margin-bottom: 15px; margin-top: 15px; border-radius: 15px;" onclick="currentDayView = -1; showScreen('view-add-schedule')">➕ שיבוץ חדש ביומן</button>
+        
+            <div id="daysGrid" class="grid-2" style="margin-top:15px;"></div>
+            
+            <button class="btn-raw" style="width:100%; border-color:#3b82f6; color:#3b82f6; font-weight:bold; margin-top:15px;" onclick="showAllAvailableSlots()">🔍 חיפוש שעות פנויות השבוע</button>
+
+            <div class="action-box" style="margin-top:20px; border-color:var(--mustard-color); background:#fffbeb;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="color:var(--secondary-color); margin:0;">📋 רשימת המתנה (לא משובצים)</h4>
+                    <button onclick="openAddPatientModal()" class="btn-success" style="padding:5px 15px; margin:0; width:auto; border-radius:10px; font-size:14px;">➕ מטופל חדש</button>
+                </div>
+                <ul id="waitingListContainer" style="list-style:none; padding:0; margin:0; max-height:150px; overflow-y:auto;"></ul>
+            </div>
+        </div>
+
+        <div id="view-day-schedule" class="view-screen">
+            <button class="btn-small btn-back" style="margin-bottom:15px;" onclick="showScreen('view-schedule-days')">🔙 חזרה לימי העבודה</button>
+            <div class="action-box" style="margin-top:0;">
+                <h3 id="dayViewTitle" style="text-align: center; border:none; margin:0;"></h3>
+                <div id="daySlotsContainer" style="margin-top:15px;"></div>
+            </div>
+        </div>
+
+        <div id="view-add-schedule" class="view-screen">
+            <button class="btn-small btn-back" style="margin-bottom:15px;" onclick="goBackFromAddSchedule()">🔙 ביטול וחזרה ליומן</button>
+            <div class="action-box" style="margin-top:0;">
+                <h3>➕ הוספת שיבוץ ליומן</h3>
+                
+                <div style="display:flex; gap:10px; margin-bottom:15px; background:#f1f5f9; padding:10px; border-radius:10px; flex-wrap:wrap;">
+                    <label style="font-weight:bold; cursor:pointer;"><input type="radio" name="schType" value="patient" checked onchange="toggleScheduleType()"> 👤 טיפול קבוע</label>
+                    <label style="font-weight:bold; cursor:pointer;"><input type="radio" name="schType" value="onetime" onchange="toggleScheduleType()"> 👤 פגישה חד-פעמית</label>
+                    <label style="font-weight:bold; cursor:pointer;"><input type="radio" name="schType" value="break" onchange="toggleScheduleType()"> ☕ הפסקה</label>
+                    <label style="font-weight:bold; cursor:pointer;"><input type="radio" name="schType" value="other" onchange="toggleScheduleType()"> ⭐ אחר</label>
+                </div>
+                <div id="schPatientArea">
+                    <select id="schedulePatientSelect"></select>
+                </div>
+                
+                <div id="schBreakArea" style="display:none;">
+                    <p style="margin:0 0 10px 0; font-size:14px; font-weight:bold; color:var(--primary-color);">בחרי משך הפסקה:</p>
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <button class="btn-raw" style="margin:0; padding:10px; flex:1;" onclick="setDurationField('schBreakCustom', 15)">15 דק'</button>
+                        <button class="btn-raw" style="margin:0; padding:10px; flex:1;" onclick="setDurationField('schBreakCustom', 30)">30 דק'</button>
+                        <button class="btn-raw" style="margin:0; padding:10px; flex:1;" onclick="setDurationField('schBreakCustom', 60)">60 דק'</button>
+                    </div>
+                    <input type="number" id="schBreakCustom" placeholder="משך הפסקה (דקות)" value="30">
+                </div>
+
+                <div id="schOtherArea" style="display:none;">
+                    <input type="text" id="schOtherTitle" placeholder="תיאור (למשל: ישיבת צוות)">
+                    <input type="number" id="schOtherDuration" placeholder="משך זמן בדקות (למשל 45)" value="45">
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <select id="scheduleDay" style="flex:1;" onchange="updateTimeSlots()"></select>
+                    <select id="scheduleTime" style="flex:1;"><option value="">-- בחר שעה פנויה --</option></select>
+                </div>
+                <button class="btn-success" id="btnSaveSchedule" onclick="assignSchedule()">💾 שמור שיבוץ 45 דקות</button>
+            </div>
+        </div>
+
+        <div id="view-exercises" class="view-screen">
+            <h3 style="text-align: center; font-size: 24px; margin-top:10px;">🏋️ בנק תרגילים</h3>
+            <div id="exercisesMainView">
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <button class="btn-success" style="flex:1; padding:12px;" onclick="openAddFolderModal()">📁 תיקייה חדשה</button>
+                    <button class="btn-success" style="flex:1; padding:12px; background:var(--secondary-color);" onclick="openAddExerciseModal()">➕ תרגיל חדש</button>
+                </div>
+                <div id="foldersGrid" class="grid-2"></div>
+                <h4 style="margin-top:20px; border-top:2px dashed var(--light-accent); padding-top:15px;">תרגילים חופשיים (ללא תיקייה):</h4>
+                <div id="freeExercisesGrid" class="grid-2"></div>
+            </div>
+            <div id="exercisesInFolderView" style="display:none;">
+                <button class="btn-small btn-back" onclick="backToFolders()">🔙 חזרה לבנק התרגילים</button>
+                <h3 id="currentFolderName" style="text-align:center; margin:15px 0;"></h3>
+                <div id="exercisesGrid" class="grid-2"></div>
+                <button class="btn-subtle-delete" style="margin-top:30px; display:block; width:100%; text-align:center;" onclick="deleteCurrentFolder()">מחק תיקייה זו</button>
+            </div>
+        </div>
+
+        <div id="view-finances" class="view-screen">
+            <h3 style="text-align: center; font-size: 24px; margin-top:10px;">💰 הנהלת חשבונות</h3>
+            
+            <div style="display:flex; margin-top:15px; background:var(--card-bg); border-radius:15px; border:2px solid var(--light-accent); overflow:hidden;">
+                <div id="tabIncome" style="flex:1; text-align:center; padding:12px; font-weight:bold; cursor:pointer; background:var(--primary-color); color:white;" onclick="switchFinanceTab('income')">הכנסות</div>
+                <div id="tabExpense" style="flex:1; text-align:center; padding:12px; font-weight:bold; cursor:pointer; background:var(--card-bg); color:var(--text-main);" onclick="switchFinanceTab('expense')">הוצאות</div>
+            </div>
+
+            <div id="financeIncomeView" class="action-box">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <select id="financePeriodType" style="flex:1;" onchange="toggleFinancePeriod()">
+                        <option value="month">חודשי</option>
+                        <option value="year">שנתי</option>
+                    </select>
+                    <input type="month" id="financeMonth" style="flex:2;" onchange="renderFinances()">
+                    <select id="financeYear" style="flex:2; display:none;" onchange="renderFinances()">
+                        <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+                    </select>
+                </div>
+                
+                <div id="financeResults" style="margin-top:15px;"></div>
+                <div id="patientsWithDebtContainer" style="margin-top:15px;"></div>
+                
+                <details style="margin-top:15px; background:var(--app-bg); border-radius:10px; padding:10px; border:1px solid #cbd5e1;">
+                    <summary style="font-weight:bold; cursor:pointer; color:var(--primary-color); outline:none;">מטופלים ללא חובות פתוחים ▼</summary>
+                    <div id="patientsWithoutDebtContainer" style="margin-top:10px;"></div>
+                </details>
+                
+                <div style="margin-top:25px; padding-top:15px; border-top:2px dashed var(--light-accent);">
+                    <button class="btn-raw" style="width:100%; font-weight:bold; margin-bottom:10px; background:#f0fdfa; color:var(--primary-color); border-color:var(--light-accent);" onclick="showExportOptions('דוח_הכנסות', getFinancialHTML('income'))">📥 הורדת דוח הכנסות</button>
+                    <button class="btn-raw" style="width:100%; font-weight:bold; margin-bottom:10px; background:#e0f2fe; color:#0284c7; border-color:#bae6fd;" onclick="showExportOptions('דוח_הכנסות_והוצאות', getFinancialHTML('all'))">📥 הורדת דוח הכנסות והוצאות מלא</button>
+                </div>
+            </div>
+
+            <div id="financeExpenseView" class="action-box" style="display:none;">
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px; border-bottom: 2px dashed var(--light-accent); padding-bottom: 15px;">
+                    <select id="expensePeriodType" style="flex:1;" onchange="toggleExpensePeriod()">
+                        <option value="month">חודשי</option>
+                        <option value="year">שנתי</option>
+                    </select>
+                    <input type="month" id="expenseMonth" style="flex:2;" onchange="renderExpenses()">
+                    <select id="expenseYear" style="flex:2; display:none;" onchange="renderExpenses()">
+                        <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+                    </select>
+                </div>
+                
+                <h3 style="border-bottom:none; margin-bottom:5px;">הוספת הוצאה חדשה</h3>
+                <input type="date" id="expDate">
+                <input type="text" id="expDesc" placeholder="עבור מה ההוצאה? (לדוג: משחקים, דלק)">
+                <input type="number" id="expAmount" placeholder="סכום (₪)">
+                
+                <div class="cam-btn-wrap" style="margin-top:10px;">
+                    <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed; border-color:var(--secondary-color); color:var(--secondary-color); background:#fff7ed;">📷 צלמי קבלה עכשיו</button>
+                    <input type="file" id="expImage" accept="image/*" capture="environment" onchange="handleExpenseImage(this)">
+                </div>
+                <div id="expImgPreview" style="display:none; text-align:center; margin-top:10px;">
+                    <span style="color:var(--success); font-size:14px; font-weight:bold;">✅ התמונה נקלטה</span>
+                </div>
+                
+                <button class="btn-success" onclick="saveExpense()">💾 שמור הוצאה</button>
+                
+                <h3 style="margin-top:30px; font-size:16px;">פירוט הוצאות:</h3>
+                <div id="expensesListContainer"></div>
+                
+                <div style="margin-top:25px; padding-top:15px; border-top:2px dashed var(--light-accent);">
+                    <button class="btn-raw" style="width:100%; font-weight:bold; margin-bottom:10px; background:#fef2f2; color:var(--danger); border-color:#fecaca;" onclick="showExportOptions('דוח_הוצאות', getFinancialHTML('expense'))">📥 הורדת דוח הוצאות</button>
+                    <button class="btn-raw" style="width:100%; font-weight:bold; margin-bottom:10px; background:#e0f2fe; color:#0284c7; border-color:#bae6fd;" onclick="showExportOptions('דוח_הכנסות_והוצאות', getFinancialHTML('all'))">📥 הורדת דוח הכנסות והוצאות מלא</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- מודלים פנימיים -->
+        <div id="addPatientModal" class="modal">
+            <div class="modal-content">
+                <h3>👥 רישום מטופל/ת חדש/ה</h3>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>שם פרטי (חובה):</h4><input type="text" id="newPatientFirstName"></div>
+                    <div style="flex:1;"><h4>שם משפחה (חובה):</h4><input type="text" id="newPatientLastName"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>ת.ז:</h4><input type="text" id="newPatientId"></div>
+                    <div style="flex:1;"><h4>טלפון הורה 1:</h4><input type="tel" id="newPatientPhone"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>תאריך לידה:</h4><input type="date" id="newPatientDob"></div>
+                    <div style="flex:1;"><h4>מכסת טיפולים (לא חובה):</h4><input type="number" id="newPatientTotalSessions" placeholder="למשל 12"></div>
+                </div>
+                <h4>אימייל:</h4><input type="email" id="newPatientEmail">
+                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #cbd5e1;">
+                    <h4>תעריף קבוע למפגש (₪):</h4>
+                    <input type="number" id="newPatientBasePrice" value="300">
+                </div>
+                
+                <button class="btn-success" onclick="saveNewPatient(false)">💾 פתיחת תיק</button>
+                <button class="btn-primary" style="background:#0ea5e9; color:white; border-radius:18px; font-weight:bold; padding:15px; width:100%; margin-top:10px; border:none; cursor:pointer;" onclick="saveNewPatient(true)">📅 פתיחת תיק ומעבר לשיבוץ ביומן</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addPatientModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="manageDebtReceiptModal" class="modal">
+            <div class="modal-content">
+                <h3 style="color:var(--primary-color);">💰 ניהול חובות וקבלות</h3>
+                <p style="font-size:14px; margin-bottom:15px; color:#64748b;">סמני איזה מהמפגשים שולמו או שעבורם הופקה קבלה:</p>
+                <div id="manageDebtReceiptList" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
+                
+                <div style="background:#f0fdfa; padding:15px; border-radius:10px; border:1px solid var(--primary-color); margin-bottom:15px;">
+                    <h4 style="margin:0 0 10px 0;">פעולות מהירות:</h4>
+                    <button class="btn-raw" style="margin-bottom:10px; padding:10px; background:white; font-size:14px;" onclick="copyMissingReceiptDates()">📋 העתק תאריכים שחסרה בהם קבלה</button>
+                    <button class="btn-success" style="margin:0; padding:10px; width:100%; font-size:14px; background:#0284c7; border-radius:12px;" onclick="openSavedReceiptWebsite()">🌐 מעבר לאתר חשבוניות / קבלות</button>
+                </div>
+                <button class="btn-success" onclick="saveDebtReceiptUpdates()">💾 שמור שינויים</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('manageDebtReceiptModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="debtReminderModal" class="modal">
+            <div class="modal-content">
+                <h3 style="color:#ea580c;">⚠️ דוח מצב חשבון פתוח</h3>
+                <div id="debtReminderContent" style="background:#fff7ed; padding:15px; border-radius:10px; font-size:15px; line-height:1.5; margin-bottom:15px; border:1px solid #fed7aa; white-space:pre-wrap;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-wa" style="flex:1; margin:0;" onclick="executeDebtReminder('wa')">💬 שליחה בווצאפ</button>
+                    <button class="btn-email btn-link-style" style="flex:1; margin:0;" onclick="executeDebtReminder('email')">📧 שליחה במייל</button>
+                </div>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('debtReminderModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="addFolderModal" class="modal"><div class="modal-content"><h3>📁 תיקייה חדשה</h3><input type="text" id="newFolderName" placeholder="שם התיקייה"><button class="btn-success" onclick="createNewFolder()">שמור</button><button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addFolderModal')">ביטול</button></div></div>
+        
+        <div id="addExerciseModal" class="modal">
+            <div class="modal-content">
+                <h3 id="exModalTitle">➕ תרגיל חדש לבנק</h3>
+                <select id="exerciseFolderSelect"></select>
+                <input type="text" id="addExName" placeholder="שם התרגיל">
+                <textarea id="addExDesc" rows="3" placeholder="הסבר קצר..."></textarea>
+                <div class="cam-btn-wrap" style="margin-top:15px;">
+                    <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed;">📷 העלאת תמונה או צילום מהמכשיר</button>
+                    <input type="file" id="addExImage" accept="image/*" onchange="handleAddExerciseImageUpload(this)">
+                </div>
+                <div id="imgPreviewAddEx" style="height:80px; margin-top:10px; background-size:contain; background-repeat:no-repeat; background-position:center;"></div>
+                <button class="btn-success" onclick="saveExerciseToBank()">שמור לבנק</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addExerciseModal')">ביטול</button>
+            </div>
+        </div>
+        
+        <div id="practiceModal" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <h3>📝 בניית תוכנית תרגול</h3>
+                <p style="font-size:14px; font-weight:bold; color:var(--primary-color); margin-bottom:5px;">1. בחרי תרגילים מהבנק:</p>
+                <div id="practiceBankSelection" style="max-height:200px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1;"></div>
+                <p style="font-size:14px; font-weight:bold; color:var(--primary-color); margin-top:20px; margin-bottom:5px;">2. או הוסיפי תרגיל ספציפי חדש (צלמי!):</p>
+                <div style="background:#fff; padding:15px; border-radius:15px; border:2px dashed var(--light-accent);">
+                    <input type="text" id="customExName" placeholder="שם התרגיל (למשל: בניית מגדל)" style="margin-top:0;">
+                    <textarea id="customExDesc" rows="2" placeholder="הסבר להורים..."></textarea>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                        <div class="cam-btn-wrap" style="flex:1;">
+                            <button class="btn-success" style="pointer-events:none; margin:0; width:100%; padding:10px; font-size:14px;">📷 צלמי עכשיו</button>
+                            <input type="file" id="customExImage" accept="image/*" capture="environment" onchange="handleCustomImageUpload(this)">
+                        </div>
+                        <div id="imgPreviewCustom" style="width:40px; height:40px; border-radius:8px; border:1px solid #cbd5e1; background-size:cover; background-position:center; display:none;"></div>
+                    </div>
+                    <button class="btn-raw" style="margin-top:10px; padding:10px; border-color:var(--primary-color); color:var(--primary-color);" onclick="addCustomExerciseToProgram()">➕ הוסף לתוכנית</button>
+                </div>
+                <div style="background:#fffaf5; border-radius:15px; padding:15px; margin-top:20px; border:1px solid #fed7aa;">
+                    <h4 style="margin:0 0 10px 0; color:var(--secondary-color);">התרגילים שנבחרו לתוכנית:</h4>
+                    <ul id="selectedPracticeList" style="list-style:none; padding:0; margin:0; font-size:14px;"></ul>
+                    <button class="btn-success" style="margin-top:15px; background:#3b82f6;" onclick="showExportOptions('תכנית_תרגול', getPracticeHTML())">📥 הורדת קובץ תרגול לבית</button>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn-wa" style="flex:1; border-radius:15px; padding:12px; font-size:14px; margin:0;" onclick="sendPracticeTextWA()">💬 שליחת טקסט לווצאפ</button>
+                        <button class="btn-email btn-link-style" style="flex:1; border-radius:15px; padding:12px; font-size:14px; margin:0;" onclick="sendPracticeTextEmail()">📧 שליחת טקסט למייל</button>
+                    </div>
+                </div>
+                <button class="btn-raw" style="width:100%; margin-top:15px;" onclick="closeModal('practiceModal')">סגור</button>
+            </div>
+        </div>
+
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <h3>⚙️ הגדרות, זמנים ומיתוג</h3>
+                
+                <h4 style="margin-top:15px; text-align:right;">🎨 עיצוב ומיתוג:</h4>
+                <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">לוגו הקליניקה:</label>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div class="cam-btn-wrap" style="flex:2;">
+                            <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed;">🖼️ העלאת לוגו חדש</button>
+                            <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
+                        </div>
+                        <button class="btn-subtle-delete" style="flex:1; margin:0;" onclick="removeLogo()">🗑️ הסרת לוגו</button>
+                    </div>
+                    
+                    <label style="font-weight:bold; display:block; margin-top:15px; margin-bottom:5px;">פלטת צבעים:</label>
+                   <select id="themeSelect" onchange="previewTheme()">
+                        <option value="default">פלטה גנרית (נקייה - טורקיז כהה ואפור)</option>
+                        <option value="vibrant">הרמוניה תוססת (טורקיז, קורל וחרדל)</option>
+                        <option value="classic">ים תיכוני (כחול קלאסי, ירוק רענן)</option>
+                        <option value="warm">אדמה חמימה (חמרה ומרווה)</option>
+                        <option value="calm">פסטל מרגיע (סגול רך וורוד)</option>
+                        <option value="auto" id="autoThemeOption" style="display:none;">✨ צבעים אוטומטיים לפי הלוגו שהועלה</option>
+                    </select>
+                </div>
+
+                <h4 style="margin-top:15px; text-align:right;">זמני עבודה:</h4>
+                <div id="wh-container"></div>
+                <button class="btn-success" onclick="saveSettings()">שמור הגדרות</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('settingsModal')">סגור</button>
+            </div>
+        </div>
+
+        <!-- תחתית האפליקציה: קרדיט קבוע -->
+        <div style="text-align: center; padding: 20px; font-size: 13px; color: #94a3b8; margin-top: 30px; border-top: 1px dashed #e2e8f0; line-height: 1.5;" class="no-print">
+            &copy; כל הזכויות שמורות לאסתר בן פורת | 054-6703332 | esterayelet@gmail.com <br>
+            <small style="display:block; margin-top:5px; font-weight:bold;">אין להעתיק או להעביר תוכנה זו ללא אישור מפורש מהמפתחת.</small>
+        </div>
+
+        <div class="bottom-nav no-print">
+            <div class="nav-item active" id="nav-patients" onclick="showScreen('view-patients')">👥 מטופלים</div>
+            <div class="nav-item" id="nav-schedule" onclick="showScreen('view-schedule-days')">📅 יומן</div>
+            <div class="nav-item" id="nav-exercises" onclick="showScreen('view-exercises')">🏋️ תרגילים</div>
+            <div class="nav-item" id="nav-finances" onclick="showScreen('view-finances')">💰 הנה"ח</div>
+        </div>
+
+    </div> 
+</div> 
+<script>
+    const DAY_NAMES = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"];
+
+    const THEMES = {
+        default: { p: '#3a7d8c', s: '#475569', m: '#eab348', l: '#f1f5f9' },
+        vibrant: { p: '#4e9b97', s: '#e47373', m: '#eab348', l: '#fcecec' },
+        classic: { p: '#1e3a8a', s: '#475569', m: '#10b981', l: '#eff6ff' },
+        warm: { p: '#c2410c', s: '#047857', m: '#d97706', l: '#ffedd5' },
+        calm: { p: '#6d28d9', s: '#db2777', m: '#ca8a04', l: '#f5f3ff' }
+    };
+
+    function applyTheme(themeName) {
+        if(themeName === 'auto') {
+            const autoTheme = JSON.parse(localStorage.getItem('clinicAutoTheme'));
+            if(autoTheme) {
+                document.documentElement.style.setProperty('--primary-color', autoTheme.p);
+                document.documentElement.style.setProperty('--secondary-color', autoTheme.s);
+                document.documentElement.style.setProperty('--mustard-color', autoTheme.m);
+                document.documentElement.style.setProperty('--light-accent', autoTheme.l);
+                return;
+            }
+        }
+        const t = THEMES[themeName] || THEMES.default;
+        document.documentElement.style.setProperty('--primary-color', t.p);
+        document.documentElement.style.setProperty('--secondary-color', t.s);
+        document.documentElement.style.setProperty('--mustard-color', t.m);
+        document.documentElement.style.setProperty('--light-accent', t.l);
+    }
+
+    function previewTheme() {
+        applyTheme(document.getElementById('themeSelect').value);
+    }
+
+    // === מנגנון בחירת פורמט הורדה ===
+    let pendingExportFilename = "";
+    let pendingExportHtml = "";
+
+    function showExportOptions(filename, htmlContent) {
+        pendingExportFilename = filename;
+        pendingExportHtml = htmlContent;
+        document.getElementById('exportModal').style.display = 'block';
+    }
+
+    function executeExport(type) {
+        closeModal('exportModal');
+        if (type === 'pdf') {
+            exportToPDF(pendingExportFilename, pendingExportHtml);
+        } else if (type === 'word') {
+            exportToWord(pendingExportFilename, pendingExportHtml);
+        } 
+    }
+
+    function exportToPDF(filename, htmlContent) {
+        const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
+        const originalTitle = document.title;
+        document.title = filename; 
+        
+        let printArea = document.getElementById('clinicPrintArea');
+        if (!printArea) {
+            printArea = document.createElement('div');
+            printArea.id = 'clinicPrintArea';
+            document.body.appendChild(printArea);
+            
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @media print {
+                    body > *:not(#clinicPrintArea) { display: none !important; }
+                    #clinicPrintArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; direction:rtl; }
+                    @page { margin: 20mm; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        printArea.innerHTML = `
+            <div dir="rtl" style="font-family: 'Rubik', Arial, sans-serif; color: #1e293b; padding: 20px;">
+                <style>
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: right; }
+                    th { background-color: #f1f5f9; font-weight: bold; color: ${pColor}; }
+                    .finance-total-row { font-weight: bold; background: #f8fafc; }
+                    .print-exercise-row { border-bottom: 1px dashed #cbd5e1; padding: 15px 0; display: flex; gap: 15px; justify-content: space-between; align-items: flex-start; page-break-inside: avoid; }
+                    .print-exercise-img { max-width: 150px; border-radius: 10px; border:2px solid #cbd5e1; }
+                    div, tr, li, p, blockquote { page-break-inside: avoid; }
+                    h2, h3, h4 { page-break-after: avoid; margin-top: 20px;}
+                </style>
+                ${htmlContent}
+            </div>
+        `;
+        
+        window.print();
+        
+        setTimeout(() => {
+            printArea.innerHTML = '';
+            document.title = originalTitle;
+        }, 1000);
+    }
+
+    function exportToWord(filename, htmlContent) {
+        const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
+        const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>" + filename + "</title><style>body { font-family: Arial, sans-serif; direction: rtl; text-align: right; margin: 40px; padding: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: right; } th { background-color: #f1f5f9; font-weight: bold; color: " + pColor + "; }</style></head><body>";
+        const postHtml = "</body></html>";
+        const html = preHtml + htmlContent + postHtml;
+
+        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = filename + '.doc';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
+    }
+
+    // כלים למייל וניווט
+    function openMailto(email, subject, body) {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`;
+        } else {
+            const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body || '')}`;
+            window.open(gmailLink, '_blank');
+        }
+    }
+    
+    function openExternalApp(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function handleLogoUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader(); 
+            reader.onload = function (e) {
+                const img = new Image(); 
+                img.onload = function() {
+                    const canvas = document.createElement('canvas'); 
+                    const MAX_WIDTH = 300; 
+                    let width = img.width; 
+                    let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height; 
+                    const ctx = canvas.getContext('2d'); 
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/png', 0.8); 
+                    localStorage.setItem('clinicCustomLogo', base64);
+                    
+                    try {
+                        const imgData = ctx.getImageData(10, 10, width - 20, height - 20).data;
+                        let r=0, g=0, b=0, count=0;
+                        for(let i=0; i<imgData.length; i+=20) {
+                            r += imgData[i]; g += imgData[i+1]; b += imgData[i+2]; count++;
+                        }
+                        r = Math.floor(r/count); g = Math.floor(g/count); b = Math.floor(b/count);
+                        const hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+                        
+                        const autoTheme = { p: hex, s: '#475569', m: '#eab348', l: hex + '15' };
+                        localStorage.setItem('clinicAutoTheme', JSON.stringify(autoTheme));
+                        localStorage.setItem('clinicTheme', 'auto');
+                    } catch(err) {
+                        localStorage.setItem('clinicTheme', 'default');
+                    }
+
+                    updateLogoDisplay();
+                    applyTheme(localStorage.getItem('clinicTheme'));
+                    alert("הלוגו נקלט והמערכת התאימה את הצבעים אוטומטית!");
+                }; 
+                img.src = e.target.result;
+            }; 
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function removeLogo() {
+        localStorage.setItem('clinicCustomLogo', 'none');
+        localStorage.removeItem('clinicAutoTheme');
+        localStorage.setItem('clinicTheme', 'default');
+        updateLogoDisplay();
+        applyTheme('default');
+    }
+
+    function updateLogoDisplay() {
+        const savedLogo = localStorage.getItem('clinicCustomLogo');
+        const mainLogo = document.getElementById('mainLogo');
+        const autoOpt = document.getElementById('autoThemeOption');
+        if (!mainLogo) return;
+
+        if (savedLogo && savedLogo !== 'none') {
+            mainLogo.src = savedLogo;
+            mainLogo.style.display = 'inline-block';
+            if(autoOpt) autoOpt.style.display = 'block';
+        } else {
+            mainLogo.style.display = 'none';
+            if(autoOpt) autoOpt.style.display = 'none';
+        }
+    }
+
+    function getLogoHtmlForPrint() {
+        const savedLogo = localStorage.getItem('clinicCustomLogo');
+        if(savedLogo && savedLogo !== 'none') return `<img src="${savedLogo}" style="max-height:80px;">`;
+        return '';
+    }
+
+    let patients = JSON.parse(localStorage.getItem('myPatientsData')) || [];
+    let expenses = JSON.parse(localStorage.getItem('myExpensesData')) || [];
+    let exerciseFolders = JSON.parse(localStorage.getItem('myExerciseFolders')) || [];
+    let freeExercises = JSON.parse(localStorage.getItem('myFreeExercises')) || []; 
+    let breaks = JSON.parse(localStorage.getItem('myBreaksList')) || [];
+    
+    let defaultWH = {}; 
+    for(let i=0; i<=5; i++) defaultWH[i] = {active: (i<5), location: "קליניקה", start: "08:00", end: "16:00"};
+    let workingHours = JSON.parse(localStorage.getItem('myWorkingHours')) || defaultWH;
+    
+    let currentPatientIndex = -1;
+    let currentDayView = -1;
+    let currentFolderId = null;
+    let editingExerciseIdx = -1; 
+    let isEditingFreeExercise = false;
+    let tempBankImageBase64 = null;
+    let tempExpenseImageBase64 = null;
+    let customPracticeImageBase64 = null;
+    let selectedExercisesForPrint = [];
+    let currentDebtText = "";
+
+    function saveToMemory() {
+        localStorage.setItem('myPatientsData', JSON.stringify(patients));
+        localStorage.setItem('myExpensesData', JSON.stringify(expenses));
+        localStorage.setItem('myWorkingHours', JSON.stringify(workingHours));
+        localStorage.setItem('myExerciseFolders', JSON.stringify(exerciseFolders));
+        localStorage.setItem('myFreeExercises', JSON.stringify(freeExercises));
+        localStorage.setItem('myBreaksList', JSON.stringify(breaks));
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openTransferModal() { document.getElementById('transferModal').style.display = 'block'; }
+
+    function checkFirstTime() {
+        const hasSeenToS = localStorage.getItem('clinicAppToS');
+        if (!hasSeenToS) {
+            const modal = document.getElementById('tosModal');
+            if(modal) modal.style.display = 'block';
+        } else {
+            checkMandatoryBackup();
+        }
+    }
+
+    function acceptToS() {
+        localStorage.setItem('clinicAppToS', 'true');
+        localStorage.setItem('myLastBackupDate', new Date().toDateString());
+        localStorage.setItem('myBackupSeenDate', new Date().toDateString());
+        
+        closeModal('tosModal');
+    }
+
+    function checkMandatoryBackup() {
+        const today = new Date().toDateString();
+        const lastBackup = localStorage.getItem('myLastBackupDate');
+        const lastSeen = localStorage.getItem('myBackupSeenDate');
+        if (lastBackup !== today && lastSeen !== today) {
+            const modal = document.getElementById('forcedBackupModal');
+            if(modal) modal.style.display = 'block';
+        }
+    }
+
+    function dismissBackup() {
+        localStorage.setItem('myBackupSeenDate', new Date().toDateString());
+        closeModal('forcedBackupModal');
+    }
+
+    function executeDailyBackup() {
+        const allData = { patients, expenses, exerciseFolders, freeExercises, breaks, workingHours };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        const dateStr = new Date().toLocaleDateString('he-IL').replace(/\./g, '-');
+        downloadAnchorNode.setAttribute("download", `גיבוי_קליניקה_${dateStr}.json`);
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        localStorage.setItem('myLastBackupDate', new Date().toDateString());
+        
+        const modal = document.getElementById('forcedBackupModal');
+        if(modal) modal.style.display = 'none';
+    }
+
+    function restoreBackupFromFile(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if(importedData.patients) localStorage.setItem('myPatientsData', JSON.stringify(importedData.patients));
+                    if(importedData.expenses) localStorage.setItem('myExpensesData', JSON.stringify(importedData.expenses));
+                    if(importedData.exerciseFolders) localStorage.setItem('myExerciseFolders', JSON.stringify(importedData.exerciseFolders));
+                    if(importedData.freeExercises) localStorage.setItem('myFreeExercises', JSON.stringify(importedData.freeExercises));
+                    if(importedData.breaks) localStorage.setItem('myBreaksList', JSON.stringify(importedData.breaks));
+                    if(importedData.workingHours) localStorage.setItem('myWorkingHours', JSON.stringify(importedData.workingHours));
+                    alert("✅ הנתונים שוחזרו בהצלחה! המערכת תתרענן כעת.");
+                    window.location.reload();
+                } catch (error) {
+                    alert("❌ שגיאה בקריאת הקובץ. ודאי שזהו קובץ הגיבוי המקורי (.json).");
+                }
+            };
+            reader.readAsText(input.files[0]);
+        }
+    }
+
+    function checkLicenseStatus() {
+        const SECRET_KEY = "CX-9821-TR44"; 
+        const activationKey = localStorage.getItem('clinicApp_Activated');
+        const firstUse = localStorage.getItem('clinicApp_FirstInstallDate');
+
+        if (activationKey === SECRET_KEY) return;
+
+        if (!firstUse) {
+            localStorage.setItem('clinicApp_FirstInstallDate', Date.now());
+            return;
+        }
+
+        const daysPassed = Math.floor((Date.now() - firstUse) / (1000 * 60 * 60 * 24));
+        const trialDays = 30;
+
+        if (daysPassed > trialDays) {
+            showLockScreen();
+        }
+    }
+
+    function showLockScreen() {
+        const lockOverlay = document.createElement('div');
+        lockOverlay.id = "lockOverlay";
+        lockOverlay.style = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.98); z-index: 100000;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Rubik', sans-serif; color: white; direction: rtl;
+        `;
+
+        lockOverlay.innerHTML = `
+            <div style="background: white; color: #1e293b; padding: 40px; border-radius: 25px; width: 90%; max-width: 500px; text-align: center; border: 5px solid #3a7d8c; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                <h2 style="color: #3a7d8c; margin-top: 0; font-size: 26px;">חודש הניסיון הסתיים! 👋</h2>
+                
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: right; border-right: 4px solid #3a7d8c;">
+                    <p style="font-size: 16px; margin-top: 0; margin-bottom: 10px; color: #334155; font-weight: bold;">
+                        להמשך שימוש קבוע במערכת, עקבי אחרי השלבים הבאים:
+                    </p>
+                    <ul style="margin: 0; padding-right: 20px; font-size: 14px; line-height: 1.6; color: #475569;">
+                        <li>שלמי תשלום חד-פעמי לפי פרטי ההעברה מטה.</li>
+                        <li>שלחי צילום אסמכתא לוואטסאפ למספר 054-6703332 או למייל esterayelet@gmail.com.</li>
+                        <li>קבלי חזרה הודעה עם קוד ההפעלה האישי שלך והזיני אותו בתיבה.</li>
+                    </ul>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 18px; border-radius: 15px; margin: 20px 0; font-size: 14px; text-align: right; border: 1px solid #e2e8f0; color: #334155;">
+                    <b style="color: #3a7d8c; font-size: 15px; display:block; margin-bottom:5px;">📋 פרטי העברה לתשלום חד-פעמי (299 ₪):</b>
+                    🏦 <b>בנק הפועלים (12)</b> | סניף 290 | חשבון 110505<br>
+                    📱 <b>Bit:</b> למספר 054-6703332<br>
+                    👤 על שם: אסתר אילת מצליח
+                </div>
+                
+                <input type="text" id="activationInput" placeholder="הזיני כאן את קוד הרישיון שקיבלת" 
+                       style="width: 100%; padding: 15px; border: 2px solid #cbd5e1; border-radius: 15px; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px;">
+                
+                <button onclick="tryActivate()" style="width: 100%; background: #3a7d8c; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                    🔓 שחרור המערכת לעבודה קבועה
+                </button>
+            </div>
+        `;
+        document.body.appendChild(lockOverlay);
+    }
+
+    function tryActivate() {
+        const input = document.getElementById('activationInput').value.trim();
+        const SECRET_KEY = "CX-9821-TR44"; 
+        
+        if (input === SECRET_KEY) {
+            localStorage.setItem('clinicApp_Activated', SECRET_KEY);
+            alert("המערכת הופעלה בהצלחה! תודה רבה ובהצלחה בהמשך העבודה בקליניקה ❤️");
+            location.reload();
+        } else {
+            alert("קוד הפעלה שגוי או לא בתוקף. נא לוודא את הקוד מול המפתחת.");
+        }
+    }
+
+    async function callGemini(promptText, callback) {
+        const key = localStorage.getItem('myApiKey');
+        if(!key) {
+            alert("מנוע הבינה המלאכותית מושבת זמנית במהלך הרצת הפיילוט, כדי להבטיח את יציבות המערכת. עמך הסליחה! 🤖");
+            return;
+        }
+        const loadingModal = document.getElementById('aiLoadingModal');
+        if(loadingModal) loadingModal.style.display = 'block';
+        try {
+            let model = "gemini-2.0-flash";
+            let url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
+            if (response.status === 404) {
+                model = "gemini-2.5-flash";
+                url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                });
+            }
+            const data = await response.json();
+            if(data.error) throw new Error(data.error.message);
+            const text = data.candidates[0].content.parts[0].text;
+            callback(text);
+        } catch(e) {
+            alert("❌ שגיאה בחיבור ל-AI: " + e.message);
+        } finally {
+            if(loadingModal) loadingModal.style.display = 'none';
+        }
+    }
+
+    function improveSessionNotes() {
+        const ta = document.getElementById('sessionNotes');
+        if(!ta.value.trim()) return alert("אנא כתבי משהו בתיעוד לפני הפעלת הבינה המלאכותית.");
+        const prompt = `אתה אסיסטנט וירטואלי של מרפאה בעיסוק. כתוב מחדש את הערות הטיפול הבאות בשפה קלינית ומקצועית:\n${ta.value}`;
+        callGemini(prompt, (res) => { ta.value = res.trim(); });
+    }
+
+    function summarizePatientState() {
+        const p = patients[currentPatientIndex];
+        if(!p.sessions || p.sessions.length === 0) return alert("אין מספיק היסטוריה כדי לסכם.");
+        const recentNotes = p.sessions.slice(-3).map(s => `תאריך ${s.date}: ${s.notes}`).join("\n");
+        const prompt = `אתה אסיסטנט של מרפאה בעיסוק. הנה 3 התיעודים האחרונים של ${p.name}:\n${recentNotes}\nנסח בנקודות קצרות את ההתקדמות והצע 2 מטרות להמשך הטיפול.`;
+        callGemini(prompt, (res) => {
+            const ta = document.getElementById('detailGoalsInput');
+            ta.value = (ta.value ? ta.value + "\n\n--- הצעת בינה מלאכותית ---\n" : "") + res.trim();
+        });
+    }
+
+    function generateSummaryReport() {
+        const p = patients[currentPatientIndex];
+        if(!p.sessions || p.sessions.length === 0) return alert("אין מספיק היסטוריה ליצירת דוח.");
+        const allNotes = p.sessions.map(s => s.date + ": " + s.notes).join("\n");
+        const prompt = `כתוב דוח סיכום טיפול מקצועי ורשמי עבור המטופל/ת ${p.name} על סמך ההיסטוריה הבאה:\n${allNotes}\nהדוח צריך לכלול רקע קצר, מהלך טיפולים והמלצות להמשך.`;
+        callGemini(prompt, (res) => {
+            navigator.clipboard.writeText(res).then(() => alert("✅ דוח הסיכום נוצר והועתק לעכבר שלך! הדביקי עכשיו במסמך Word."));
+        });
+    }
+
+    function generateContinuationLetter() {
+        const p = patients[currentPatientIndex];
+        const prompt = `כתוב מכתב רשמי קצר לקופת חולים המבקש המשך טיפולי ריפוי בעיסוק עבור ${p.name}. נסח בצורה קלינית המציינת התקדמות אך צורך בתמיכה נוספת.`;
+        callGemini(prompt, (res) => {
+            navigator.clipboard.writeText(res).then(() => alert("✅ המכתב נוצר והועתק לעכבר שלך! הדביקי עכשיו ב-Word או במייל."));
+        });
+    }
+
+    function suggestNextPlan() {
+        const p = patients[currentPatientIndex];
+        if(!p.sessions || p.sessions.length === 0) return alert("אין מספיק היסטוריה להצעת תכנון.");
+        const lastNote = p.sessions[p.sessions.length-1].notes;
+        const prompt = `מרפאה בעיסוק סיימה טיפול. הערות אחרונות:\n"${lastNote}"\nהצע 2 משחקים/פעילויות יצירתיות להמשך העבודה בטיפול הבא.`;
+        callGemini(prompt, (res) => { document.getElementById('nextPlanInput').value = res.trim(); });
+    }
+
+    function generateTomorrowReminders() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const day = tomorrow.getDay();
+        const cont = document.getElementById('tomorrowRemindersContainer');
+        
+        if (day > 5) { 
+            cont.innerHTML = "<p style='font-size:14px; text-align:center;'>אין טיפולים בסוף השבוע.</p>";
+            return;
+        }
+        
+        const tomorrowPatients = patients.filter(p => !p.archived && p.weeklyDay === day && p.weeklyTime);
+        tomorrowPatients.sort((a,b) => a.weeklyTime.localeCompare(b.weeklyTime));
+        
+        if (tomorrowPatients.length === 0) {
+            cont.innerHTML = "<p style='font-size:14px; text-align:center;'>אין טיפולים משובצים למחר.</p>";
+        } else {
+            let html = "<ul style='list-style:none; padding:0; margin:0;'>";
+            tomorrowPatients.forEach(p => {
+                let waBtn = p.parentPhone1 ? `<button class='btn-small btn-wa' style='padding:4px 8px; font-size:12px;' onclick="openExternalApp('https://wa.me/${p.parentPhone1.replace(/\D/g,'').replace(/^0/,'972')}?text=${encodeURIComponent('היי! מזכירה שיש לנו תור מחר בשעה ' + p.weeklyTime + '. נתראה!')}')">💬 תזכורת</button>` : '';
+                html += `<li style='background:white; padding:8px; border-radius:8px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center; border:1px solid #cbd5e1;'><span style='font-size:14px;'><b>${p.weeklyTime}</b> - ${p.name}</span> ${waBtn}</li>`;
+            });
+            html += "</ul>";
+            cont.innerHTML = html;
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.view-screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(id).classList.add('active-screen');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        
+        if(id.includes('patient') || id.includes('archive')) document.getElementById('nav-patients').classList.add('active');
+        if(id.includes('schedule')) document.getElementById('nav-schedule').classList.add('active');
+        if(id.includes('exercise')) document.getElementById('nav-exercises').classList.add('active');
+        if(id.includes('finance')) document.getElementById('nav-finances').classList.add('active');
+
+        window.scrollTo(0,0);
+
+        if(id === 'view-patients') renderHomeList();
+        else if(id === 'view-archive') renderArchiveList();
+        else if(id === 'view-schedule-days') renderDaysGrid();
+        else if(id === 'view-finances') {
+            let now = new Date();
+            if(!document.getElementById('financeMonth').value) {
+                document.getElementById('financeMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                document.getElementById('financeYear').value = now.getFullYear();
+            }
+            if(!document.getElementById('expDate').value) document.getElementById('expDate').valueAsDate = now;
+            if(!document.getElementById('expenseMonth').value) {
+                document.getElementById('expenseMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+                document.getElementById('expenseYear').value = now.getFullYear();
+            }
+            if(document.getElementById('financeExpenseView').style.display === 'block') renderExpenses();
+            else renderFinances();
+        }
+        else if(id === 'view-exercises') {
+            document.getElementById('exercisesInFolderView').style.display = 'none'; document.getElementById('exercisesMainView').style.display = 'block'; renderFolders();
+        }
+        else if(id === 'view-add-schedule') {
+            populateDaySelectors(); renderScheduleSelect(); toggleScheduleType();
+            if(currentDayView !== -1) { document.getElementById('scheduleDay').value = currentDayView; updateTimeSlots(); }
+        }
+    }
+
+    function openSection(id) {
+        document.getElementById('patientMenuGrid').style.display = 'none';
+        document.querySelectorAll('.patient-section').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
+    function closeSection() {
+        document.querySelectorAll('.patient-section').forEach(s => s.style.display = 'none');
+        document.getElementById('patientMenuGrid').style.display = 'grid';
+    }
+
+    let isDictating = false;
+    let activeRecognition = null;
+    let originalTextForDictation = "";
+
+    function startDictation(targetId, btnId) {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return alert("הדפדפן לא תומך בהקלטה קולית.");
+        
+        const btn = document.getElementById(btnId);
+        const ta = document.getElementById(targetId);
+        
+        if (isDictating) {
+            isDictating = false;
+            if (activeRecognition) activeRecognition.stop();
+            btn.innerHTML = "🎤 הקלטה קולית"; 
+            btn.style.color = "#0284c7";
+            return;
+        }
+
+        isDictating = true;
+        btn.innerHTML = "🔴 מקליט... (לחצי לעצירה)"; 
+        btn.style.color = "red";
+        
+        originalTextForDictation = ta.value;
+
+        const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+        activeRecognition = new Speech(); 
+        activeRecognition.lang = 'he-IL';
+        activeRecognition.continuous = true;
+        activeRecognition.interimResults = true;
+
+        activeRecognition.onresult = (e) => { 
+            let interimTranscript = '';
+            let finalTranscript = '';
+            for (let i = e.resultIndex; i < e.results.length; ++i) {
+                if (e.results[i].isFinal) {
+                    finalTranscript += e.results[i][0].transcript + " ";
+                } else {
+                    interimTranscript += e.results[i][0].transcript;
+                }
+            }
+            
+            if (finalTranscript) {
+                originalTextForDictation += (originalTextForDictation ? " " : "") + finalTranscript.trim();
+            }
+            
+            ta.value = originalTextForDictation + (interimTranscript ? " " + interimTranscript : "");
+        };
+
+        activeRecognition.onend = () => { 
+            if (isDictating) {
+                try { activeRecognition.start(); } catch(e) {}
+            } else {
+                btn.innerHTML = "🎤 הקלטה קולית"; 
+                btn.style.color = "#0284c7";
+            }
+        }; 
+
+        activeRecognition.start();
+    }
+
+    function renderHomeList() {
+        const list = document.getElementById('activePatientList'); const search = document.getElementById('patientSearch').value.toLowerCase(); const today = new Date().getDay();
+        list.innerHTML = ""; let arr = patients.map((p, i) => ({...p, i})).filter(p => !p.archived && p.name.toLowerCase().includes(search));
+        if(!arr.length) { list.innerHTML = "<p style='text-align:center;'>אין מטופלים להצגה.</p>"; return; }
+        arr.sort((a,b) => { let aT = a.weeklyDay === today ? 1 : 0; let bT = b.weeklyDay === today ? 1 : 0; if(aT !== bT) return bT - aT; return (b.lastOpened || 0) - (a.lastOpened || 0); });
+        arr.forEach(p => {
+            let badge = p.weeklyDay === today ? `<span style="background:var(--primary-color);color:white;padding:3px 10px;border-radius:12px;font-size:12px;margin-right:auto;">🌟 היום</span>` : "";
+            list.innerHTML += `<div class="list-item" onclick="openPatient(${p.i})"><span>${p.name}</span> ${badge}</div>`;
+        });
+    }
+
+    function renderArchiveList() {
+        const list = document.getElementById('archivedPatientList'); const search = document.getElementById('archiveSearch').value.toLowerCase();
+        list.innerHTML = ""; let arr = patients.map((p, i) => ({...p, i})).filter(p => p.archived && p.name.toLowerCase().includes(search));
+        arr.forEach(p => { list.innerHTML += `<div class="list-item archive" onclick="openPatient(${p.i})">${p.name}</div>`; });
+    }
+    
+    function openAddPatientModal() {
+        const safeClear = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        };
+
+        safeClear('newPatientFirstName', "");
+        safeClear('newPatientLastName', "");
+        safeClear('newPatientId', "");
+        safeClear('newPatientDob', "");
+        safeClear('newPatientPhone', "");
+        safeClear('newPatientPhone2', "");
+        safeClear('newPatientEmail', "");
+        safeClear('newPatientBasePrice', "300");
+        safeClear('newPatientTotalSessions', "");
+
+        const modals = document.querySelectorAll('#addPatientModal');
+        if (modals.length > 0) {
+            modals.forEach(m => m.style.display = 'block');
+        } else {
+            alert("שגיאה: חלון הוספת מטופל לא נמצא בקוד.");
+        }
+    }
+
+    function saveNewPatient(goToSchedule) {
+        const getVal = (id, def) => {
+            const el = document.getElementById(id);
+            return el ? el.value.trim() : def;
+        };
+
+        const first = getVal('newPatientFirstName', ""); 
+        const last = getVal('newPatientLastName', "");
+        
+        if(!first || !last) return alert("חובה להזין שם פרטי ושם משפחה.");
+        
+        const fullName = `${first} ${last}`;
+        
+        patients.push({ 
+            name: fullName, 
+            idNumber: getVal('newPatientId', ""), 
+            birthDate: getVal('newPatientDob', ""),
+            parentPhone1: getVal('newPatientPhone', ""), 
+            parentPhone2: getVal('newPatientPhone2', ""), 
+            parentEmail: getVal('newPatientEmail', ""), 
+            basePrice: getVal('newPatientBasePrice', "300") || 300,
+            totalSessions: getVal('newPatientTotalSessions', ""),
+            seriesNumber: 1,
+            seriesOffset: 0,
+            archived: false, 
+            sessions: [], 
+            goals: "", 
+            dilemmas: "", 
+            nextPlan: "", 
+            lastOpened: Date.now() 
+        });
+        
+        saveToMemory(); 
+        
+        document.querySelectorAll('#addPatientModal').forEach(m => m.style.display = 'none'); 
+        
+        renderWaitingList(); 
+        
+        if(goToSchedule) {
+            const pIdx = patients.length - 1;
+            scheduleFromWaitingList(pIdx);
+        } else {
+            showScreen('view-patients');
+        }
+    }
+
+    function startNewSeries() {
+        const p = patients[currentPatientIndex];
+        p.seriesNumber = (parseInt(p.seriesNumber) || 1) + 1;
+        document.getElementById('patientSeriesNumber').value = p.seriesNumber;
+        
+        let relevantSessions = p.sessions.filter(s => s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים');
+        p.seriesOffset = relevantSessions.length; 
+        
+        document.getElementById('patientTotalSessions').value = "";
+        p.totalSessions = "";
+        
+        saveToMemory();
+        updateSessionQuotaInView();
+        
+        document.getElementById('sessionNumber').value = 1;
+        
+        alert(`סדרה חדשה (סדרה ${p.seriesNumber}) נפתחה בהצלחה!\nמספר הטיפול אופס ל-1.\nאנא הזיני את המכסה החדשה לסדרה זו ולחצי על 'שמור פרטים'.`);
+    }
+
+    function updateSessionProgressAlert() {
+        if(currentPatientIndex === -1) return;
+        const p = patients[currentPatientIndex];
+        const total = parseInt(p.totalSessions);
+        const current = parseInt(document.getElementById('sessionNumber').value);
+        const alertDiv = document.getElementById('sessionEndAlert');
+        
+        if (total && current) {
+            const diff = total - current;
+            if (diff <= 3 && diff >= 0) {
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = `⚠️ <b>שימי לב:</b> נותרו עוד ${diff} טיפולים לסיום הסדרה המאושרת (${total}). זכרי להכין דוח סיכום או לשבץ מטופל חדש.`;
+            } else if (diff < 0) {
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = `⚠️ <b>חריגה מהמכסה:</b> עברת את מכסת הטיפולים המאושרת (${total}).<br><br><b>האם אושרה סדרה חדשה?</b><button class="btn-small" style="background:#ea580c; color:white; margin-top:8px; width:100%;" onclick="openSection('sec-info')">לעדכון מכסה חדשה</button>`;
+            } else {
+                alertDiv.style.display = 'none';
+            }
+        } else {
+            alertDiv.style.display = 'none';
+        }
+    }
+
+    function updateSessionQuotaInView() {
+        if(currentPatientIndex === -1) return;
+        const p = patients[currentPatientIndex];
+        const total = document.getElementById('patientTotalSessions')?.value || p.totalSessions;
+        const series = document.getElementById('patientSeriesNumber')?.value || p.seriesNumber || 1;
+        const displaySpan = document.getElementById('sessionQuotaDisplay');
+        
+        if(displaySpan) {
+            if(total) {
+                displaySpan.innerText = `(מתוך ${total} | סדרה ${series})`;
+            } else {
+                displaySpan.innerText = `(סדרה ${series})`;
+            }
+        }
+        updateSessionProgressAlert();
+    }
+
+    document.getElementById('sessionNumber').addEventListener('input', updateSessionProgressAlert);
+
+    function handleReceiptWebsiteChange() {
+        const select = document.getElementById('receiptWebsiteSelect');
+        const customInput = document.getElementById('receiptWebsiteCustomUrl');
+        
+        localStorage.setItem('clinicReceiptDefault', select.value);
+
+        if(select.value === 'other') {
+            customInput.style.display = 'block';
+        } else {
+            customInput.style.display = 'none';
+        }
+    }
+
+    function goToReceiptWebsite() {
+        const select = document.getElementById('receiptWebsiteSelect');
+        let url = select.value;
+        if(url === 'other') {
+            url = document.getElementById('receiptWebsiteCustomUrl').value.trim();
+            if(!url) return alert("אנא הזיני כתובת אתר ידנית.");
+            if(!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            localStorage.setItem('clinicReceiptCustomDefault', url);
+        }
+        openExternalApp(url);
+    }
+
+    // === עדכון כותרות דוחות התיעודים ===
+    function getSessionHistoryHTML() {
+        const p = patients[currentPatientIndex]; 
+        
+        let ageStr = "";
+        if(p.birthDate) {
+            let ageDifMs = Date.now() - new Date(p.birthDate).getTime();
+            let ageDate = new Date(ageDifMs);
+            let age = Math.abs(ageDate.getUTCFullYear() - 1970);
+            ageStr = ` | גיל: ${age}`;
+        }
+
+        let html = `
+            <div style="text-align:center; border-bottom:2px solid var(--primary-color); padding-bottom:15px; margin-bottom:20px;">
+                ${getLogoHtmlForPrint()}
+                <h2 style="color:var(--primary-color); margin:10px 0;">דוח תיעוד מפגשים קליניים</h2>
+                <h3 style="margin:5px 0;">מטופל/ת: ${p.name}</h3>
+                <p style="margin:5px 0; font-size:14px; color:#475569; font-weight:bold;">
+                    ת.ז: ${p.idNumber || 'לא הוזן'}${ageStr} | סדרה מס': ${p.seriesNumber || 1}
+                </p>
+            </div>
+            <div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:20px;">
+                <h3 style="margin-top:0;">🎯 מטרות הטיפול:</h3>
+                <p style="white-space:pre-wrap;">${(p.goals||'לא הוגדרו')}</p>
+            </div>
+        `;
+        [...p.sessions].reverse().forEach(s => { 
+            let paidText = s.paid ? "שולם" : "לא שולם";
+            html += `
+            <div style="margin-bottom:20px; border:1px solid #cbd5e1; border-radius:10px; padding:15px;">
+                <h4 style="margin:0 0 10px 0; border-bottom:1px dashed #cbd5e1; padding-bottom:5px;">📅 ${s.date} | ${s.type} ${s.number ? '(מפגש '+s.number+')' : ''} | <small>${paidText}</small></h4>
+                <p style="white-space:pre-wrap; margin:0; line-height:1.5;">${s.notes}</p>
+            </div>`; 
+        });
+        return html;
+    }
+
+    function downloadMonthlySessionHistory() {
+        const p = patients[currentPatientIndex]; 
+        const monthFilter = document.getElementById('reportMonthSelect').value;
+        
+        if(!monthFilter) return alert("אנא בחרי חודש להפקת הדוח.");
+        
+        const filteredSessions = p.sessions.filter(s => s.date.startsWith(monthFilter));
+        if(filteredSessions.length === 0) return alert("לא נמצאו תיעודים לחודש שנבחר.");
+
+        const monthName = new Date(monthFilter + "-01").toLocaleDateString('he-IL', {month:'long', year:'numeric'});
+        
+        let html = `
+            <div style="text-align:center; border-bottom:2px solid var(--primary-color); padding-bottom:15px; margin-bottom:20px;">
+                ${getLogoHtmlForPrint()}
+                <h2 style="color:var(--primary-color); margin:10px 0;">דוח תיעודים לחודש ${monthName}</h2>
+                <h3 style="margin:5px 0;">מטופל/ת: ${p.name}</h3>
+            </div>
+        `;
+        
+        if(p.goals) {
+            html += `<div style="background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #cbd5e1;">
+                        <h4 style="margin-top:0;">🎯 מטרות טיפוליות:</h4>
+                        <p style="white-space:pre-wrap; margin:0; font-size:14px;">${p.goals}</p>
+                     </div>`;
+        }
+        
+        [...filteredSessions].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(s => { 
+            html += `
+            <div style="margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <b style="font-size:16px;">📅 תאריך: ${s.date}</b>
+                    <span style="font-weight:bold; color:#64748b;">סוג מפגש: ${s.type || 'טיפול'}</span>
+                </div>
+                <p style="white-space:pre-wrap; margin:0; line-height:1.5; font-size:15px;">${s.notes}</p>
+            </div>`; 
+        });
+        
+        html += `
+            <div style="margin-top:40px; padding-top:20px; border-top:1px solid #cbd5e1; display:flex; justify-content:space-between; font-size:13px; color:#64748b;">
+                <span>הופק באמצעות מערכת ניהול קליניקה</span>
+                <span>חתימת המטפל/ת: _________________</span>
+            </div>
+        `;
+        
+        showExportOptions(`דוח_חודשי_${monthFilter}_${p.name.replace(/ /g, '_')}`, html);
+    }
+
+    function getFinancialHTML(reportType) {
+        let t = reportType === 'expense' ? document.getElementById('expensePeriodType').value : document.getElementById('financePeriodType').value;
+        let f = t==='month' ? (reportType === 'expense' ? document.getElementById('expenseMonth').value : document.getElementById('financeMonth').value) : (reportType === 'expense' ? document.getElementById('expenseYear').value : document.getElementById('financeYear').value);
+        
+        if(!f) {
+            alert("אנא בחרי תקופה קודם.");
+            return "";
+        }
+        
+        let titleBase = t==='month' ? `חודש ${f}` : `שנת ${f}`;
+        let reportTitle = "";
+        if(reportType === 'income') reportTitle = `דוח הכנסות - ${titleBase}`;
+        else if(reportType === 'expense') reportTitle = `דוח הוצאות - ${titleBase}`;
+        else reportTitle = `דוח הכנסות והוצאות - ${titleBase}`;
+
+        let totalIncome = 0; let totalExpense = 0; let rowsHtml = "";
+        
+        if(reportType === 'income' || reportType === 'all') {
+            patients.forEach(p => { 
+                p.sessions.forEach(s => { 
+                    if(s.paid && s.type!=='הדרכה' && s.type!=='אינטייק' && s.type!=='שיחת הורים' && s.date.includes(f)) { 
+                        let price = parseInt(p.basePrice)||300; if(s.type==='אבחון') price*=2.5; else if(s.type==='תצפית במסגרת חינוכית') price*=1.5; 
+                        totalIncome += price;
+                        rowsHtml += `<tr><td>${s.date}</td><td>הכנסה</td><td>טיפול - ${p.name}</td><td>₪${price}</td></tr>`; 
+                    } 
+                }); 
+            });
+        }
+        
+        if(reportType === 'expense' || reportType === 'all') {
+            expenses.forEach(ex => { 
+                if(ex.date.includes(f)) {
+                    totalExpense += parseInt(ex.amount);
+                    rowsHtml += `<tr><td>${ex.date}</td><td>הוצאה</td><td>${ex.desc}</td><td style="color:#ef4444">₪${ex.amount}-</td></tr>`;
+                }
+            });
+        }
+
+        if(rowsHtml === "") {
+            alert("אין נתונים כספיים לתקופה זו עבור הדוח המבוקש.");
+            return "";
+        }
+
+        let balanceHtml = "";
+        if(reportType === 'all') {
+            let balance = totalIncome - totalExpense;
+            balanceHtml = `
+                <tr class="total-row"><td colspan="3">סה"כ הכנסות:</td><td>₪${totalIncome}</td></tr>
+                <tr class="total-row" style="color:#ef4444;"><td colspan="3">סה"כ הוצאות:</td><td>₪${totalExpense}-</td></tr>
+                <tr class="total-row" style="font-size:18px;"><td colspan="3">מאזן לתקופה:</td><td style="color:${balance>=0?'#3a7d8c':'#ef4444'}">₪${balance}</td></tr>
+            `;
+        } else if(reportType === 'income') { balanceHtml = `<tr class="total-row"><td colspan="3">סה"כ הכנסות:</td><td>₪${totalIncome}</td></tr>`; } 
+        else if(reportType === 'expense') { balanceHtml = `<tr class="total-row" style="color:#ef4444;"><td colspan="3">סה"כ הוצאות:</td><td>₪${totalExpense}</td></tr>`; }
+        
+        const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
+        const logoHtml = getLogoHtmlForPrint();
+
+        return `
+            <div style="text-align:center; border-bottom:2px solid ${pColor}; padding-bottom:15px; margin-bottom:20px;">
+                ${logoHtml}
+                <h2 style="color:${pColor}; margin:10px 0;">${reportTitle}</h2>
+                <h3>דוח הנהלת חשבונות</h3>
+            </div>
+            <table>
+                <thead><tr><th>תאריך</th><th>סוג תנועה</th><th>תיאור / מטופל</th><th>סכום</th></tr></thead>
+                <tbody>${rowsHtml}</tbody>
+                <tfoot>${balanceHtml}</tfoot>
+            </table>
+        `;
+    }
+
+    function getPracticeHTML() {
+        let h = ``;
+        selectedExercisesForPrint.forEach((ex, i) => {
+            let img = ex.img ? `<img src="${ex.img}" class="print-exercise-img">` : '';
+            h += `<div class="print-exercise-row"><div style="flex:1;"><h3 style="margin:0 0 8px 0; font-size:18px;">${i+1}. ${ex.name}</h3><p style="margin:0; font-size:15px; line-height:1.4; white-space:pre-wrap;">${ex.desc}</p></div>${img}</div>`;
+        });
+        return h;
+    }
+
+    function openPatient(i) {
+        currentPatientIndex = i; const p = patients[i]; 
+        if (!p) return;
+        
+        if (!p.sessions) p.sessions = [];
+        if (!p.seriesNumber) p.seriesNumber = 1;
+        if (!p.seriesOffset) p.seriesOffset = 0;
+        
+        p.lastOpened = Date.now(); saveToMemory();
+        document.getElementById('detailName').innerText = "👤 " + p.name; 
+        let nameParts = p.name.split(' ');
+        document.getElementById('patientFirstNameEdit').value = nameParts[0] || "";
+        document.getElementById('patientLastNameEdit').value = nameParts.slice(1).join(' ') || "";
+        
+        document.getElementById('detailGoalsInput').value = p.goals || ""; document.getElementById('detailDilemmasInput').value = p.dilemmas || ""; document.getElementById('nextPlanInput').value = p.nextPlan || "";
+        document.getElementById('patientId').value = p.idNumber || ""; document.getElementById('patientDob').value = p.birthDate || "";
+        document.getElementById('parentPhone1').value = p.parentPhone1 || ""; document.getElementById('parentPhone2').value = p.parentPhone2 || ""; document.getElementById('parentEmail').value = p.parentEmail || "";
+        document.getElementById('patientBasePrice').value = p.basePrice || 300;
+        document.getElementById('patientTotalSessions').value = p.totalSessions || "";
+        document.getElementById('patientSeriesNumber').value = p.seriesNumber || 1;
+
+        if(p.nextPlan && p.nextPlan.trim() !== "") {
+            document.getElementById('nextPlanAlert').style.display = 'block'; document.getElementById('nextPlanAlertText').innerText = p.nextPlan;
+        } else { document.getElementById('nextPlanAlert').style.display = 'none'; }
+
+        if(p.parentPhone1) { 
+            document.getElementById('btnWA').style.display='inline-flex'; 
+            document.getElementById('btnWA').onclick = function(e) { e.preventDefault(); openExternalApp("https://wa.me/" + p.parentPhone1.replace(/\D/g, '').replace(/^0/, '972')); };
+            document.getElementById('btnCall').style.display='inline-flex'; 
+            document.getElementById('btnCall').href="tel:" + p.parentPhone1; 
+        } else { 
+            document.getElementById('btnWA').style.display='none'; 
+            document.getElementById('btnCall').style.display='none'; 
+        }
+        
+        if(p.parentEmail) { 
+            document.getElementById('btnEmail').style.display='inline-flex';
+            document.getElementById('btnEmail').onclick = function(e) {
+                e.preventDefault();
+                openMailto(p.parentEmail, "עדכון מהקליניקה", "");
+            };
+        } else { 
+            document.getElementById('btnEmail').style.display='none'; 
+        }
+
+        if(p.archived) { document.getElementById('btnArchive').style.display='none'; document.getElementById('btnUnarchive').style.display='block'; }
+        else { document.getElementById('btnArchive').style.display='block'; document.getElementById('btnUnarchive').style.display='none'; }
+
+        document.getElementById('sessionDate').valueAsDate = new Date();
+        
+        let relevantSessions = p.sessions.filter(s => s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים');
+        let offset = p.seriesOffset || 0;
+        let nextNum = (relevantSessions.length - offset) + 1;
+        if(nextNum < 1) nextNum = 1;
+        
+        document.getElementById('sessionNumber').value = nextNum;
+        document.getElementById('sessionNotes').value = ""; document.getElementById('sessionPaid').checked = false; document.getElementById('sessionReceipt').checked = false;
+        document.getElementById('sessionType').value = "טיפול"; 
+        
+        const savedReceiptSite = localStorage.getItem('clinicReceiptDefault') || "https://ypay.co.il/";
+        const select = document.getElementById('receiptWebsiteSelect');
+        
+        if([...select.options].some(o => o.value === savedReceiptSite)) {
+            select.value = savedReceiptSite;
+        } else {
+            select.value = "https://ypay.co.il/";
+        }
+        
+        if (savedReceiptSite === 'other') {
+            document.getElementById('receiptWebsiteCustomUrl').style.display = "block";
+            document.getElementById('receiptWebsiteCustomUrl').value = localStorage.getItem('clinicReceiptCustomDefault') || "";
+        } else {
+            document.getElementById('receiptWebsiteCustomUrl').style.display = "none";
+            document.getElementById('receiptWebsiteCustomUrl').value = "";
+        }
+
+        checkExpensiveSession();
+        updateSessionQuotaInView();
+        renderSummaryDashboard(p); renderHistory(p); closeSection(); showScreen('view-patient-detail');
+    }
+
+    function savePersonalDetails() {
+        const p = patients[currentPatientIndex]; 
+        const first = document.getElementById('patientFirstNameEdit').value.trim(); const last = document.getElementById('patientLastNameEdit').value.trim();
+        p.name = last ? `${first} ${last}` : first;
+        p.idNumber = document.getElementById('patientId').value; p.birthDate = document.getElementById('patientDob').value;
+        p.parentPhone1 = document.getElementById('parentPhone1').value; p.parentPhone2 = document.getElementById('parentPhone2').value; p.parentEmail = document.getElementById('parentEmail').value; 
+        p.basePrice = document.getElementById('patientBasePrice').value;
+        p.totalSessions = document.getElementById('patientTotalSessions').value;
+        p.seriesNumber = document.getElementById('patientSeriesNumber').value || 1;
+        
+        saveToMemory(); openPatient(currentPatientIndex); alert("הפרטים נשמרו!");
+    }
+
+    function saveGoals() { patients[currentPatientIndex].goals = document.getElementById('detailGoalsInput').value; patients[currentPatientIndex].dilemmas = document.getElementById('detailDilemmasInput').value; saveToMemory(); alert("נשמר!"); }
+    function saveNextPlan() { patients[currentPatientIndex].nextPlan = document.getElementById('nextPlanInput').value; saveToMemory(); openPatient(currentPatientIndex); alert("התכנון נשמר!"); }
+    function markPlanDone() { if(confirm("למחוק את התכנון לטיפול הבא?")) { patients[currentPatientIndex].nextPlan = ""; saveToMemory(); openPatient(currentPatientIndex); } }
+    
+    function transferPlanToSession() {
+        const p = patients[currentPatientIndex]; if (!p.nextPlan) return;
+        const currentNotes = document.getElementById('sessionNotes').value;
+        document.getElementById('sessionNotes').value = (currentNotes ? currentNotes + "\n\n" : "") + "מתכנון הטיפול:\n" + p.nextPlan;
+        p.nextPlan = ""; saveToMemory(); document.getElementById('nextPlanAlert').style.display = 'none'; openSection('sec-session');
+    }
+
+    function archivePatient() { if(confirm("לסיים סדרת טיפולים ולהעביר את התיק לארכיון?")) { patients[currentPatientIndex].archived = true; patients[currentPatientIndex].weeklyDay = null; saveToMemory(); renderWaitingList(); showScreen('view-patients'); } }
+    function unarchivePatient() { patients[currentPatientIndex].archived = false; saveToMemory(); renderWaitingList(); openPatient(currentPatientIndex); }
+    function deletePatient() { if(confirm("אזהרה חמורה: האם את בטוחה שברצונך למחוק את התיק לצמיתות?")) { patients.splice(currentPatientIndex, 1); saveToMemory(); showScreen('view-patients'); } }
+    function goBackToPatientsOrArchive() { if(patients[currentPatientIndex].archived) showScreen('view-archive'); else showScreen('view-patients'); }
+
+    function checkExpensiveSession() { 
+        const type = document.getElementById('sessionType').value; 
+        document.getElementById('expensiveWarning').style.display = (type === 'אבחון' || type === 'תצפית במסגרת חינוכית') ? 'block' : 'none'; 
+        document.getElementById('sessionTypeOther').style.display = (type === 'אחר') ? 'block' : 'none';
+    }
+    
+    function saveSession() {
+        const date = document.getElementById('sessionDate').value; const notes = document.getElementById('sessionNotes').value;
+        if(!date || !notes) return alert("חובה למלא תאריך ותיעוד!");
+        
+        let type = document.getElementById('sessionType').value;
+        if(type === 'אחר') {
+            type = document.getElementById('sessionTypeOther').value.trim();
+            if(!type) return alert("יש להזין את סוג המפגש בשדה הטקסט.");
+        }
+
+        let isPaid = document.getElementById('sessionPaid').checked;
+        let sNum = document.getElementById('sessionNumber').value;
+        let sTotal = patients[currentPatientIndex].totalSessions;
+        let sSeries = patients[currentPatientIndex].seriesNumber || 1;
+        
+        let numberToSave = sNum;
+        if (sNum && sTotal) {
+            numberToSave = `${sNum} מתוך ${sTotal} (סדרה ${sSeries})`;
+        } else if (sNum) {
+            numberToSave = `${sNum} (סדרה ${sSeries})`;
+        }
+        
+        patients[currentPatientIndex].sessions.push({ date, notes, number: numberToSave, type: type, paid: isPaid, receipt: document.getElementById('sessionReceipt').checked });
+        saveToMemory(); 
+        
+        let p = patients[currentPatientIndex];
+        let unpaidCount = p.sessions.filter(s => !s.paid && s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים').length;
+        
+        if(!isPaid && unpaidCount > 0) {
+            if(confirm(`💾 התיעוד נשמר בהצלחה!\n\n⚠️ שימי לב: למטופל/ת יש כעת חוב פתוח על ${unpaidCount} טיפולים.\nהאם תרצי לשלוח עכשיו תזכורת תשלום להורים?`)) {
+                previewDebtReminder();
+            } else {
+                openPatient(currentPatientIndex); openSection('sec-history');
+            }
+        } else {
+            openPatient(currentPatientIndex); openSection('sec-history');
+        }
+    }
+    
+    let editingSessionIndex = -1;
+
+    function checkEditSessionType() {
+        const type = document.getElementById('editSessionType').value;
+        document.getElementById('editSessionTypeOther').style.display = (type === 'אחר') ? 'block' : 'none';
+    }
+
+    function openEditSession(realIdx) {
+        const s = patients[currentPatientIndex].sessions[realIdx];
+        editingSessionIndex = realIdx;
+        document.getElementById('editSessionDate').value = s.date;
+        document.getElementById('editSessionNumber').value = s.number || '';
+        
+        const select = document.getElementById('editSessionType');
+        const otherInput = document.getElementById('editSessionTypeOther');
+        let options = Array.from(select.options).map(o => o.value);
+        if (options.includes(s.type)) {
+            select.value = s.type;
+            otherInput.style.display = 'none';
+            otherInput.value = '';
+        } else {
+            select.value = 'אחר';
+            otherInput.style.display = 'block';
+            otherInput.value = s.type || '';
+        }
+
+        document.getElementById('editSessionNotes').value = s.notes;
+        document.getElementById('editSessionPaid').checked = s.paid;
+        document.getElementById('editSessionReceipt').checked = s.receipt;
+        document.getElementById('editSessionModal').style.display = 'block';
+    }
+
+    function saveEditedSession() {
+        const s = patients[currentPatientIndex].sessions[editingSessionIndex];
+        s.date = document.getElementById('editSessionDate').value;
+        s.number = document.getElementById('editSessionNumber').value;
+        
+        let type = document.getElementById('editSessionType').value;
+        if(type === 'אחר') {
+            type = document.getElementById('editSessionTypeOther').value.trim();
+        }
+        s.type = type;
+        
+        s.notes = document.getElementById('editSessionNotes').value;
+        s.paid = document.getElementById('editSessionPaid').checked;
+        s.receipt = document.getElementById('editSessionReceipt').checked;
+        
+        saveToMemory(); closeModal('editSessionModal');
+        const p = patients[currentPatientIndex];
+        renderHistory(p); renderSummaryDashboard(p);
+    }
+
+    function renderSummaryDashboard(p) {
+        let unpaid = 0; let norec = 0;
+        if(p.sessions) {
+            p.sessions.forEach(s => {
+                if(s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים') {
+                    if(!s.paid) unpaid++; if(!s.receipt) norec++;
+                }
+            });
+        }
+        if(document.getElementById('debtWarning')) {
+            document.getElementById('debtWarning').style.display = unpaid > 0 ? 'block' : 'none';
+        }
+        
+        document.getElementById('detailSummary').innerHTML = `
+            <div class="dash-card dash-clickable" onclick="openSection('sec-history')"><span class="dash-val">${p.sessions ? p.sessions.length : 0}</span><span class="dash-lbl">מפגשים</span></div>
+            <div class="dash-card dash-clickable ${unpaid > 0 ? 'dash-alert' : ''}" onclick="previewDebtReminder()"><span class="dash-val">${unpaid}</span><span class="dash-lbl">חובות</span></div>
+            <div class="dash-card dash-clickable ${norec > 0 ? 'dash-alert' : ''}" onclick="openManageDebtReceiptModal()"><span class="dash-val">${norec}</span><span class="dash-lbl">ללא קבלה</span></div>
+        `;
+    }
+
+    function openManageDebtReceiptModal() {
+        const p = patients[currentPatientIndex]; const cont = document.getElementById('manageDebtReceiptList');
+        cont.innerHTML = ""; let hasItems = false;
+        
+        p.sessions.forEach((s, idx) => {
+            if(s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים') {
+                if(!s.paid || !s.receipt) {
+                    hasItems = true;
+                    cont.innerHTML += `<div style="background:#fff; padding:15px; margin-bottom:10px; border-radius:10px; border:1px solid #cbd5e1; display:flex; flex-direction:column; gap:10px;">
+                        <b style="color:var(--primary-color); font-size:16px;">${s.date} (${s.type})</b>
+                        <div style="display:flex; gap:15px;">
+                            <label style="flex:1; background:${s.paid?'#f1f5f9':'#fef2f2'}; padding:8px; border-radius:8px; display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="mdr_paid_${idx}" ${s.paid?'checked disabled':''}> שולם</label>
+                            <label style="flex:1; background:${s.receipt?'#f1f5f9':'#fff7ed'}; padding:8px; border-radius:8px; display:flex; align-items:center; gap:5px; cursor:pointer;"><input type="checkbox" id="mdr_rec_${idx}" ${s.receipt?'checked disabled':''}> הופקה קבלה</label>
+                        </div>
+                    </div>`;
+                }
+            }
+        });
+        if(!hasItems) cont.innerHTML = "<p style='text-align:center;'>אין חובות או קבלות חסרות למטופל זה.</p>";
+        document.getElementById('manageDebtReceiptModal').style.display = 'block';
+    }
+
+    function openSavedReceiptWebsite() {
+        let url = localStorage.getItem('clinicReceiptDefault') || 'https://ypay.co.il/';
+        if(url === 'other') {
+            url = localStorage.getItem('clinicReceiptCustomDefault') || '';
+            if(!url) return alert("לא הוגדר אתר לקבלות. אנא כנסי ל'תיעוד מפגש' והגדירי את הקישור מחדש.");
+        }
+        openExternalApp(url);
+    }
+
+    function saveDebtReceiptUpdates() {
+        const p = patients[currentPatientIndex];
+        p.sessions.forEach((s, idx) => {
+            let paidCb = document.getElementById(`mdr_paid_${idx}`); let recCb = document.getElementById(`mdr_rec_${idx}`);
+            if(paidCb && paidCb.checked) s.paid = true; if(recCb && recCb.checked) s.receipt = true;
+        });
+        saveToMemory(); renderSummaryDashboard(p); renderHistory(p); closeModal('manageDebtReceiptModal'); alert("השינויים נשמרו!");
+    }
+
+    function copyMissingReceiptDates() {
+        const p = patients[currentPatientIndex]; let dates = [];
+        p.sessions.forEach(s => { if(!s.receipt && s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים') dates.push(s.date); });
+        if(dates.length === 0) return alert("אין תאריכים שחסרה בהם קבלה.");
+        let text = `תאריכים ללא קבלה (${p.name}):\n` + dates.join("\n");
+        navigator.clipboard.writeText(text).then(()=>alert("התאריכים הועתקו! את יכולה להדביק אותם במערכת הקבלות."));
+    }
+
+    function previewDebtReminder() {
+        const p = patients[currentPatientIndex];
+        let unpaidSessions = p.sessions.filter(s => !s.paid && s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים');
+        if(unpaidSessions.length === 0) return alert("אין חובות פתוחים.");
+        
+        let text = `שלום, מצורף פירוט חוב פתוח עבור טיפולי הריפוי בעיסוק של ${p.name}:\n\n`;
+        let total = 0; let base = parseInt(p.basePrice) || 300;
+        
+        unpaidSessions.forEach(s => {
+            let price = base; if(s.type === 'אבחון') price*=2.5; else if(s.type === 'תצפית במסגרת חינוכית') price*=1.5;
+            text += `- ${s.date} (${s.type}) | ₪${price}\n`; total += price;
+        });
+        text += `\nסה"כ לתשלום: ₪${total}\nנודה להסדרת התשלום בהקדם.\nתודה.`;
+        
+        currentDebtText = text; 
+        document.getElementById('debtReminderContent').innerText = text; 
+        document.getElementById('debtReminderModal').style.display = 'block';
+    }
+
+    function executeDebtReminder(method) {
+        const p = patients[currentPatientIndex];
+        if(method === 'wa') {
+            if(!p.parentPhone1) return alert("לא הוזן טלפון בתיק.");
+            openExternalApp(`https://wa.me/${p.parentPhone1.replace(/\D/g,'').replace(/^0/,'972')}?text=${encodeURIComponent(currentDebtText)}`);
+            closeModal('debtReminderModal');
+        } else if (method === 'email') {
+            if(!p.parentEmail) return alert("לא הוזן אימייל בתיק.");
+            openMailto(p.parentEmail, "פירוט חוב פתוח - " + p.name, currentDebtText);
+            closeModal('debtReminderModal');
+        }
+    }
+
+   function renderHistory(p) {
+        const cont = document.getElementById('detailHistory'); if(!p.sessions || !p.sessions.length) { cont.innerHTML = "<p>אין תיעודים.</p>"; return; }
+        let html = `<div class="session-list">`; let first = true; let older = "";
+        [...p.sessions].reverse().forEach((s, i) => {
+            let realIdx = p.sessions.length - 1 - i;
+            let title = `${s.date} ${s.number ? '(מפגש '+s.number+')' : ''} - ${s.type || 'טיפול'}`; let paidStr = s.paid ? "שולם" : "לא שולם"; let recStr = s.receipt ? "קבלה הופקה" : "ללא קבלה";
+            let editBtn = `<button class="btn-subtle-delete" style="float:left; color:var(--mustard-color); text-decoration:none;" onclick="openEditSession(${realIdx})">✏️ עריכה</button>`;
+            
+            if(first) { html += `<div class="session-item"><b>${title} - אחרון</b>${editBtn}<br><small style="color:#64748b; font-weight:bold;">${paidStr} | ${recStr}</small><div style="margin-top:10px; white-space:pre-wrap; line-height:1.5;">${s.notes}</div></div>`; first = false; }
+            else { older += `<details class="session-item" style="border-right:3px solid #cbd5e1; margin-bottom:8px;"><summary>${title} <span style="font-size:12px; float:left; margin-left:10px;">${paidStr}</span>${editBtn}</summary><div style="margin-top:10px; padding-top:10px; border-top:1px dashed #ccc; white-space:pre-wrap; line-height:1.5;">${s.notes}</div></details>`; }
+        });
+        if(p.sessions.length > 1) html += `<details style="margin-top:15px; padding:15px; background:var(--app-bg); border:1px solid #cbd5e1; border-radius:15px;"><summary style="font-weight:bold; cursor:pointer; color:var(--secondary-color); outline:none;">👇 צפייה בטיפולים קודמים (${p.sessions.length-1})</summary><div style="margin-top:15px;">${older}</div></details>`;
+        html += `</div>`; cont.innerHTML = html;
+    }
+
+    function renderFolders() {
+        const grid = document.getElementById('foldersGrid'); grid.innerHTML = ""; const freeGrid = document.getElementById('freeExercisesGrid'); freeGrid.innerHTML = "";
+        if(!exerciseFolders.length) { grid.innerHTML = "<p style='grid-column:span 2;text-align:center;'>אין תיקיות.</p>"; }
+        else { exerciseFolders.forEach(f => { grid.innerHTML += `<div class="folder-card" style="background:#f0fdfa; border:2px solid var(--primary-color); border-radius:18px; padding:20px; text-align:center; cursor:pointer;" onclick="openFolder(${f.id})"><div class="p-icon">📁</div><h3 style="margin:0; font-size:18px; color:var(--primary-color);">${f.name}</h3><span style="font-size:13px; color:#64748b; font-weight:bold; margin-top:5px; display:block;">${f.exercises.length} תרגילים</span></div>`; }); }
+        if(!freeExercises.length) { freeGrid.innerHTML = "<p style='grid-column:span 2;text-align:center;color:#94a3b8;'>אין תרגילים חופשיים.</p>"; }
+        else {
+            freeExercises.forEach((ex, idx) => {
+                let img = ex.img ? `<img src="${ex.img}" class="ex-img">` : `<div class="ex-img" style="display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight:bold;">אין תמונה</div>`;
+                freeGrid.innerHTML += `<div class="ex-card"><div class="ex-actions"><button class="btn-edit" onclick="openEditExercise(${idx}, true)">✏️ עריכה</button><button class="btn-edit" style="background:var(--danger);" onclick="deleteExercise(${idx}, true)">✖</button></div>${img}<h4 style="margin:5px 0; color:var(--primary-color);">${ex.name}</h4><p style="font-size:13px; margin:0; line-height:1.4;">${ex.desc}</p></div>`;
+            });
+        }
+    }
+
+    function openAddFolderModal() { document.getElementById('newFolderName').value = ""; document.getElementById('addFolderModal').style.display='block'; }
+    function createNewFolder() { const n = document.getElementById('newFolderName').value; if(!n) return; exerciseFolders.push({id: Date.now(), name: n, exercises: []}); saveToMemory(); closeModal('addFolderModal'); renderFolders(); }
+    function openFolder(id) { currentFolderId = id; const f = exerciseFolders.find(x=>x.id===id); document.getElementById('currentFolderName').innerText = `📁 ${f.name}`; document.getElementById('exercisesMainView').style.display='none'; document.getElementById('exercisesInFolderView').style.display='block'; renderExercises(); }
+    function backToFolders() { currentFolderId = null; document.getElementById('exercisesInFolderView').style.display='none'; document.getElementById('exercisesMainView').style.display='block'; renderFolders(); }
+    function deleteCurrentFolder() { if(confirm("למחוק את התיקייה וכל התרגילים שבתוכה?")) { exerciseFolders = exerciseFolders.filter(x=>x.id !== currentFolderId); saveToMemory(); backToFolders(); } }
+    
+    function renderExercises() {
+        const grid = document.getElementById('exercisesGrid'); grid.innerHTML = ""; const f = exerciseFolders.find(x=>x.id===currentFolderId);
+        if(!f.exercises.length) { grid.innerHTML="<p style='grid-column:span 2; text-align:center;'>התיקייה ריקה.</p>"; return; }
+        f.exercises.forEach((ex, idx) => {
+            let img = ex.img ? `<img src="${ex.img}" class="ex-img">` : `<div class="ex-img" style="display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight:bold;">אין תמונה</div>`;
+            grid.innerHTML += `<div class="ex-card"><div class="ex-actions"><button class="btn-edit" onclick="openEditExercise(${idx}, false)">✏️ עריכה</button><button class="btn-edit" style="background:var(--danger);" onclick="deleteExercise(${idx}, false)">✖</button></div>${img}<h4 style="margin:5px 0; color:var(--primary-color);">${ex.name}</h4><p style="font-size:13px; margin:0; line-height:1.4;">${ex.desc}</p></div>`;
+        });
+    }
+    
+    function handleAddExerciseImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader(); reader.onload = function (e) {
+                const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    tempBankImageBase64 = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('imgPreviewAddEx').style.backgroundImage = `url(${tempBankImageBase64})`;
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    function openAddExerciseModal() {
+        editingExerciseIdx = -1; isEditingFreeExercise = false; document.getElementById('exModalTitle').innerText = "➕ תרגיל חדש לבנק"; const sel = document.getElementById('exerciseFolderSelect'); sel.innerHTML = `<option value="free">-- ללא תיקייה (תרגיל חופשי) --</option>`;
+        exerciseFolders.forEach(f => { sel.innerHTML += `<option value="${f.id}">${f.name}</option>`; }); if(currentFolderId) sel.value = currentFolderId;
+        document.getElementById('addExName').value=""; document.getElementById('addExDesc').value=""; tempBankImageBase64=null; document.getElementById('imgPreviewAddEx').style.backgroundImage="none"; document.getElementById('addExImage').value=""; document.getElementById('addExerciseModal').style.display='block';
+    }
+    
+    function openEditExercise(idx, isFree) {
+        editingExerciseIdx = idx; isEditingFreeExercise = isFree; document.getElementById('exModalTitle').innerText = "✏️ עריכת תרגיל קיים"; const sel = document.getElementById('exerciseFolderSelect'); sel.innerHTML = `<option value="free">-- ללא תיקייה (תרגיל חופשי) --</option>`;
+        exerciseFolders.forEach(f => { sel.innerHTML += `<option value="${f.id}">${f.name}</option>`; }); 
+        
+        let ex; if(isFree) { sel.value = "free"; ex = freeExercises[idx]; } else { sel.value = currentFolderId; ex = exerciseFolders.find(x=>x.id===currentFolderId).exercises[idx]; }
+        
+        document.getElementById('addExName').value = ex.name; document.getElementById('addExDesc').value = ex.desc; tempBankImageBase64 = ex.img || null; document.getElementById('imgPreviewAddEx').style.backgroundImage = ex.img ? `url(${ex.img})` : "none"; document.getElementById('addExerciseModal').style.display='block';
+    }
+    
+    function saveExerciseToBank() {
+        const folderVal = document.getElementById('exerciseFolderSelect').value; const name = document.getElementById('addExName').value; const desc = document.getElementById('addExDesc').value;
+        if(!name) return alert("חובה לתת שם לתרגיל!");
+        
+        if(editingExerciseIdx === -1) { 
+            if(folderVal === "free") freeExercises.push({name, desc, img: tempBankImageBase64});
+            else exerciseFolders.find(f=>f.id===parseInt(folderVal)).exercises.push({name, desc, img: tempBankImageBase64});
+        } else {
+            if(isEditingFreeExercise) freeExercises.splice(editingExerciseIdx, 1);
+            else exerciseFolders.find(f=>f.id===currentFolderId).exercises.splice(editingExerciseIdx, 1);
+            
+            if(folderVal === "free") freeExercises.push({name, desc, img: tempBankImageBase64});
+            else exerciseFolders.find(f=>f.id===parseInt(folderVal)).exercises.push({name, desc, img: tempBankImageBase64});
+        }
+        saveToMemory(); closeModal('addExerciseModal'); if(currentFolderId && folderVal !== "free") renderExercises(); else { backToFolders(); }
+    }
+    
+    function deleteExercise(idx, isFree) { 
+        if(confirm("למחוק את התרגיל?")) { if(isFree) freeExercises.splice(idx,1); else exerciseFolders.find(x=>x.id===currentFolderId).exercises.splice(idx,1); saveToMemory(); if(isFree) renderFolders(); else renderExercises(); } 
+    }
+
+    function openPracticeModal() {
+        selectedExercisesForPrint = []; document.getElementById('customExName').value = ""; document.getElementById('customExDesc').value = ""; document.getElementById('customExImage').value = ""; customPracticeImageBase64 = null; document.getElementById('imgPreviewCustom').style.display = "none";
+        const cont = document.getElementById('practiceBankSelection'); cont.innerHTML = "";
+        
+        if(freeExercises.length > 0) {
+            let h = `<details style="background:white; margin-bottom:5px; padding:10px; border-radius:10px; border:1px solid #ccc;"><summary style="font-weight:bold; cursor:pointer; outline:none; color:var(--primary-color);">תרגילים חופשיים</summary><div style="margin-top:10px;">`;
+            freeExercises.forEach((ex, idx) => { h += `<label style="display:flex; align-items:center; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; cursor:pointer;"><input type="checkbox" style="width:20px;height:20px;margin:0;" onchange="toggleEx(this,'free',${idx})"> <b>${ex.name}</b></label>`; });
+            h += `</div></details>`; cont.innerHTML += h;
+        }
+
+        exerciseFolders.forEach(f => {
+            if(!f.exercises.length) return;
+            let h = `<details style="background:white; margin-bottom:5px; padding:10px; border-radius:10px; border:1px solid #ccc;"><summary style="font-weight:bold; cursor:pointer; outline:none;">${f.name}</summary><div style="margin-top:10px;">`;
+            f.exercises.forEach((ex, idx) => { h += `<label style="display:flex; align-items:center; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; cursor:pointer;"><input type="checkbox" style="width:20px;height:20px;margin:0;" onchange="toggleEx(this,${f.id},${idx})"> <b>${ex.name}</b></label>`; });
+            h += `</div></details>`; cont.innerHTML += h;
+        });
+        renderSelectedPracticeList(); document.getElementById('practiceModal').style.display='block';
+    }
+
+    function toggleEx(cb, fId, idx) { 
+        let ex; if(fId === 'free') ex = freeExercises[idx]; else ex = exerciseFolders.find(x=>x.id===fId).exercises[idx];
+        if(cb.checked) { selectedExercisesForPrint.push({...ex}); } else { selectedExercisesForPrint = selectedExercisesForPrint.filter(x => x.name !== ex.name); } renderSelectedPracticeList(); 
+    }
+
+    function handleCustomImageUpload(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader(); reader.onload = function (e) {
+                const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 400; let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    customPracticeImageBase64 = canvas.toDataURL('image/jpeg', 0.6); document.getElementById('imgPreviewCustom').style.display = 'block'; document.getElementById('imgPreviewCustom').style.backgroundImage = `url(${customPracticeImageBase64})`;
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function addCustomExerciseToProgram() {
+        const name = document.getElementById('customExName').value; const desc = document.getElementById('customExDesc').value;
+        if(!name) return alert("הזיני שם לתרגיל");
+        selectedExercisesForPrint.push({name, desc, img: customPracticeImageBase64});
+        document.getElementById('customExName').value = ""; document.getElementById('customExDesc').value = ""; document.getElementById('customExImage').value = ""; customPracticeImageBase64 = null; document.getElementById('imgPreviewCustom').style.display = 'none'; renderSelectedPracticeList();
+    }
+
+    function removeSelectedPractice(idx) { selectedExercisesForPrint.splice(idx, 1); renderSelectedPracticeList(); }
+
+    function renderSelectedPracticeList() {
+        const ul = document.getElementById('selectedPracticeList'); ul.innerHTML = "";
+        if(!selectedExercisesForPrint.length) { ul.innerHTML = "<li style='color:#94a3b8;'>לא נבחרו תרגילים.</li>"; return; }
+        selectedExercisesForPrint.forEach((ex, i) => { ul.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:8px; border:1px solid #cbd5e1; border-radius:8px; margin-bottom:5px;"><span>${i+1}. ${ex.name}</span><button class="btn-subtle-delete" style="font-size:12px;" onclick="removeSelectedPractice(${i})">✖</button></li>`; });
+    }
+
+    function getPracticeText() {
+        if(!selectedExercisesForPrint.length) return null;
+        let t = `שלום! מצורפת תוכנית תרגול עבור ${patients[currentPatientIndex].name}:\n\n`;
+        selectedExercisesForPrint.forEach((ex, i) => { t += `*${i+1}. ${ex.name}*\n${ex.desc||''}\n\n`; }); t += `בהצלחה!`; return encodeURIComponent(t);
+    }
+
+    function sendPracticeTextWA() {
+        const txt = getPracticeText(); if(!txt) return alert("לא נבחרו תרגילים.");
+        const p = patients[currentPatientIndex]; if(!p.parentPhone1) return alert("אין טלפון בתיק.");
+        openExternalApp(`https://wa.me/${p.parentPhone1.replace(/\D/g,'').replace(/^0/,'972')}?text=${txt}`);
+    }
+
+    function sendPracticeTextEmail() {
+        const txt = getPracticeText(); if(!txt) return alert("לא נבחרו תרגילים.");
+        const p = patients[currentPatientIndex]; if(!p.parentEmail) return alert("אין אימייל בתיק.");
+        openMailto(p.parentEmail, "תוכנית תרגול - " + p.name, decodeURIComponent(txt));
+    }
+
+    function openSettingsModal() {
+        let themeField = document.getElementById('themeSelect');
+        if(themeField) themeField.value = localStorage.getItem('clinicTheme') || 'default';
+
+        const cont = document.getElementById('wh-container'); cont.innerHTML = "";
+        for(let i=0; i<=5; i++) {
+            let wh = workingHours[i]; let c = wh.active ? "checked" : "";
+            cont.innerHTML += `
+            <div style="background:#f8fafc; padding:10px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:10px;">
+                <label style="font-weight:bold; display:flex; align-items:center; gap:5px;"><input type="checkbox" id="whA_${i}" ${c} style="width:20px;height:20px;margin:0;"> יום ${DAY_NAMES[i]}</label>
+                <div style="display:flex; gap:5px; margin-top:5px; align-items:center;">
+                    <input type="text" id="whL_${i}" value="${wh.location||''}" placeholder="מיקום" style="flex:2; padding:8px; margin:0; font-size:14px;">
+                    <input type="time" id="whS_${i}" value="${wh.start}" style="flex:1; padding:8px; margin:0; font-size:14px;">
+                    <span>-</span>
+                    <input type="time" id="whE_${i}" value="${wh.end}" style="flex:1; padding:8px; margin:0; font-size:14px;">
+                </div>
+            </div>`;
+        }
+        document.getElementById('settingsModal').style.display='block';
+    }
+    
+    function saveSettings() {
+        let themeField = document.getElementById('themeSelect');
+        if(themeField) localStorage.setItem('clinicTheme', themeField.value);
+
+        for(let i=0; i<=5; i++) {
+            workingHours[i].active = document.getElementById(`whA_${i}`).checked; 
+            workingHours[i].location = document.getElementById(`whL_${i}`).value; 
+            workingHours[i].start = document.getElementById(`whS_${i}`).value; workingHours[i].end = document.getElementById(`whE_${i}`).value;
+        }
+        saveToMemory(); closeModal('settingsModal'); renderDaysGrid(); applyTheme(localStorage.getItem('clinicTheme') || 'default'); alert("ההגדרות והמיתוג נשמרו בהצלחה!");
+    }
+    
+    function renderDaysGrid() {
+        const grid = document.getElementById('daysGrid'); grid.innerHTML = "";
+        for(let i=0; i<=5; i++) {
+            if(workingHours[i].active) {
+                let wh = workingHours[i];
+                let pCount = patients.filter(p=>!p.archived && p.weeklyDay===i && p.weeklyTime).length;
+                let loc = wh.location ? `<span style="display:block; font-size:13px; color:#64748b; margin-top:5px;">📍 ${wh.location}</span>` : "";
+                grid.innerHTML += `<div class="patient-menu-card" onclick="openDay(${i})"><h3 style="margin:0;color:var(--primary-color);font-size:20px;">יום ${DAY_NAMES[i]}</h3><span style="font-size:13px; color:#64748b; font-weight:bold;">${wh.start} - ${wh.end}</span>${loc}<div style="margin-top:10px; background:#f0fdfa; color:var(--primary-color); border-radius:10px; padding:5px 15px; font-weight:bold; border:1px solid var(--light-accent);">${pCount} טיפולים</div></div>`;
+            }
+        }
+    }
+
+    function showAllAvailableSlots() {
+        let html = "<div style='text-align:center; margin-bottom:15px;'><h3 style='color:var(--primary-color); margin:0;'>🕒 שעות פנויות השבוע</h3><p style='margin:5px 0 0 0; font-size:14px; color:#64748b;'>לפי שעות העבודה המוגדרות במערכת</p></div>";
+        let foundAny = false;
+        
+        for(let d=0; d<=5; d++) {
+            let wh = workingHours[d];
+            if(wh && wh.active) {
+                let busySlots = [];
+                patients.forEach(p => { if(!p.archived && p.weeklyDay === d && p.weeklyTime) { let s = timeToMins(p.weeklyTime); busySlots.push({s: s, e: s+45}); } });
+                breaks.forEach(b => { if(b.day === d && b.time) { let s = timeToMins(b.time); busySlots.push({s: s, e: s+b.duration}); } });
+
+                let startMins = timeToMins(wh.start); let endMins = timeToMins(wh.end); let available = [];
+                for(let t = startMins; t <= endMins - 45; t += 15) {
+                    let slotEnd = t + 45; let overlap = false;
+                    for(let busy of busySlots) { if(isOverlap(t, slotEnd, busy.s, busy.e)) { overlap = true; break; } }
+                    if(!overlap) available.push(minsToTime(t));
+                }
+                
+                if(available.length > 0) {
+                    foundAny = true;
+                    html += `<div style="margin-bottom:15px; background:#fff; padding:10px; border-radius:10px; border:1px solid #cbd5e1;">`;
+                    html += `<h4 style="margin:0 0 10px 0; color:var(--secondary-color); border-bottom:2px dashed #f1f5f9; padding-bottom:5px;">יום ${DAY_NAMES[d]}</h4>`;
+                    html += `<div style="display:flex; flex-wrap:wrap; gap:8px;">`;
+                    available.forEach(s => {
+                        html += `<span style="background:#e0f2fe; color:#0284c7; padding:6px 12px; border-radius:8px; font-weight:bold; font-size:14px;">${s}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+            }
+        }
+        
+        if(!foundAny) html += "<p style='text-align:center;'>לא נמצאו שעות פנויות (לטיפול של 45 דק') במהלך השבוע לפי הגדרות היומן הנוכחיות.</p>";
+        
+        document.getElementById('accListTitle').innerText = "חיפוש שעות פנויות";
+        document.getElementById('accListContainer').innerHTML = html;
+        document.getElementById('accountingListModal').style.display = 'block';
+    }
+
+    function timeToMins(tStr) { if(!tStr) return 0; let [h,m]=tStr.split(':').map(Number); return h*60+m; }
+    function minsToTime(m) { let h=Math.floor(m/60); let min=m%60; return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`; }
+    function getEndTimeStr(startStr, durationMins) { if(!startStr) return ""; return minsToTime(timeToMins(startStr) + durationMins); }
+    function isOverlap(start1, end1, start2, end2) { return Math.max(start1, start2) < Math.min(end1, end2); }
+
+    function toggleScheduleType() {
+        let type = document.querySelector('input[name="schType"]:checked').value;
+        document.getElementById('schPatientArea').style.display = (type === 'patient' || type === 'onetime') ? 'block' : 'none';
+        document.getElementById('schBreakArea').style.display = type === 'break' ? 'block' : 'none';
+        document.getElementById('schOtherArea').style.display = type === 'other' ? 'block' : 'none';
+        document.getElementById('btnSaveSchedule').innerText = (type === 'patient' || type === 'onetime') ? '💾 שמור שיבוץ 45 דקות' : '💾 שמור שיבוץ';
+        updateTimeSlots();
+    }
+
+    function setDurationField(id, val) { document.getElementById(id).value = val; updateTimeSlots(); }
+
+    function openDay(d) {
+        currentDayView = d; document.getElementById('dayViewTitle').innerText = "לוח זמנים - יום " + DAY_NAMES[d];
+        const cont = document.getElementById('daySlotsContainer'); cont.innerHTML = ""; let arr = [];
+        patients.forEach((p, i) => { if(!p.archived && p.weeklyDay===d && p.weeklyTime) arr.push({type: 'patient', time: p.weeklyTime, duration: 45, p, i}); });
+        breaks.forEach(b => { if(b.day === d && b.time) arr.push({type: b.isOther ? 'other' : 'break', time: b.time, duration: b.duration, b}); });
+        
+        arr.sort((a,b)=>a.time.localeCompare(b.time));
+        if(!arr.length) cont.innerHTML = "<p style='text-align:center; color:#94a3b8;'>אין שיבוצים ליום זה.</p>";
+        
+        arr.forEach(item => {
+            let endT = getEndTimeStr(item.time, item.duration);
+            if(item.type === 'patient') {
+                let wa = item.p.parentPhone1 ? `<button class="btn-small btn-wa" onclick="sendReminder(${item.i}, 'wa')">💬</button>` : '';
+                let mail = item.p.parentEmail ? `<button class="btn-small btn-email" onclick="sendReminder(${item.i}, 'email')">📧</button>` : '';
+                cont.innerHTML += `<div class="session-item" style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:15px; border-radius:15px;"><div><span style="display:block; color:var(--secondary-color); font-weight:900; font-size:18px; margin-bottom:3px; letter-spacing:1px;" dir="ltr">${item.time} - ${endT}</span><b style="font-size:16px; color:var(--primary-color);">${item.p.name}</b></div><div style="display:flex; gap:5px; flex-direction:column; align-items:flex-end;"><div style="display:flex; gap:5px;">${wa}${mail}</div><div style="display:flex; gap:5px;"><button class="btn-small btn-back" onclick="openPatient(${item.i})">📂 תיק</button><button class="btn-subtle-delete" style="font-size:12px; margin-top:5px;" onclick="removeSchedule('${item.i}', 'patient')">הסר מלוז</button></div></div></div>`;
+            } else {
+                let icon = item.type === 'break' ? '☕' : '⭐';
+                cont.innerHTML += `<div class="session-item" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; padding:15px; border-radius:15px; border-right-color:#94a3b8;"><div><span style="display:block; color:#64748b; font-weight:900; font-size:18px; margin-bottom:3px; letter-spacing:1px;" dir="ltr">${item.time} - ${endT}</span><b style="font-size:16px; color:#475569;">${icon} ${item.b.title}</b></div><div><button class="btn-subtle-delete" style="font-size:12px;" onclick="removeSchedule('${item.b.id}', 'break')">הסר מלוז</button></div></div>`;
+            }
+        });
+        showScreen('view-day-schedule');
+    }
+
+    function sendReminder(idx, method) {
+        const p = patients[idx]; const txt = `היי! מזכירה שיש לנו תור מחר בשעה ${p.weeklyTime}. נתראה!`;
+        if(method === 'wa') openExternalApp(`https://wa.me/${p.parentPhone1.replace(/\D/g,'').replace(/^0/,'972')}?text=${encodeURIComponent(txt)}`);
+        else if (method === 'email') openMailto(p.parentEmail, "תזכורת לתור", txt);
+    }
+    
+    function removeSchedule(id, type) { 
+        if(confirm("להסיר מהלוז השבועי?")) { 
+            if(type === 'patient') { patients[id].weeklyDay = null; patients[id].weeklyTime = null; }
+            else { breaks = breaks.filter(b => String(b.id) !== String(id)); }
+            saveToMemory(); renderWaitingList(); openDay(currentDayView); 
+        } 
+    }
+    
+    function goBackFromAddSchedule() { if(currentDayView !== -1) { openDay(currentDayView); } else { showScreen('view-schedule-days'); } }
+    
+    function populateDaySelectors() {
+        const sel = document.getElementById('scheduleDay'); sel.innerHTML = `<option value="">-- בחרי יום --</option>`;
+        for(let i=0; i<=5; i++) if(workingHours[i].active) sel.innerHTML += `<option value="${i}">${DAY_NAMES[i]}</option>`;
+    }
+    function renderScheduleSelect() {
+        const sel = document.getElementById('schedulePatientSelect'); sel.innerHTML = "<option value=''>-- בחרי מטופל לשיבוץ --</option>";
+        patients.map((p,i)=>({p,i})).filter(x=>!x.p.archived).sort((a,b)=>a.p.name.localeCompare(b.p.name)).forEach(x => sel.innerHTML += `<option value="${x.i}">${x.p.name}</option>`);
+    }
+    
+    function updateTimeSlots() {
+        const d = parseInt(document.getElementById('scheduleDay').value); const sel = document.getElementById('scheduleTime'); sel.innerHTML = "<option value=''>-- בחר שעה פנויה --</option>";
+        if(isNaN(d)) return; let wh = workingHours[d]; if(!wh || !wh.active) return;
+        
+        let type = document.querySelector('input[name="schType"]:checked').value;
+        let reqDur = 45;
+        if(type === 'break') reqDur = parseInt(document.getElementById('schBreakCustom').value) || 30;
+        if(type === 'other' || type === 'onetime') reqDur = parseInt(document.getElementById('schOtherDuration')?.value || 45) || 45;
+
+        let busySlots = [];
+        patients.forEach(p => { if(!p.archived && p.weeklyDay === d && p.weeklyTime) { let s = timeToMins(p.weeklyTime); busySlots.push({s: s, e: s+45}); } });
+        breaks.forEach(b => { if(b.day === d && b.time) { let s = timeToMins(b.time); busySlots.push({s: s, e: s+b.duration}); } });
+
+        let startMins = timeToMins(wh.start); let endMins = timeToMins(wh.end); let availableSlots = 0;
+        
+        for(let t = startMins; t <= endMins - reqDur; t += 15) {
+            let slotEnd = t + reqDur; let overlap = false;
+            for(let busy of busySlots) { if(isOverlap(t, slotEnd, busy.s, busy.e)) { overlap = true; break; } }
+            if(!overlap) { sel.innerHTML += `<option value="${minsToTime(t)}">${minsToTime(t)}</option>`; availableSlots++; }
+        }
+        if(availableSlots === 0) sel.innerHTML = `<option value="">-- אין שעות פנויות --</option>`;
+    }
+
+    document.getElementById('schBreakCustom').addEventListener('input', updateTimeSlots);
+    document.getElementById('schOtherDuration').addEventListener('input', updateTimeSlots);
+
+    function assignSchedule() {
+        let type = document.querySelector('input[name="schType"]:checked').value;
+        const d = parseInt(document.getElementById('scheduleDay').value); 
+        const t = document.getElementById('scheduleTime').value;
+        
+        if(isNaN(d) || !t) return alert("אנא בחרי יום ושעה פנויה.");
+        
+        if(type === 'patient') {
+            const pIdx = document.getElementById('schedulePatientSelect').value;
+            if(!pIdx) return alert("בחרי מטופל לשיבוץ.");
+            patients[pIdx].weeklyDay = d; 
+            patients[pIdx].weeklyTime = t;
+        } else if(type === 'onetime') {
+            const pIdx = document.getElementById('schedulePatientSelect').value;
+            if(!pIdx) return alert("בחרי מטופל לשיבוץ.");
+            const patientName = patients[pIdx].name;
+            breaks.push({id: Date.now(), day: d, time: t, duration: 45, title: "חד-פעמי: " + patientName, isOther: true});
+        } else if(type === 'break') {
+            const duration = parseInt(document.getElementById('schBreakCustom').value) || 30;
+            breaks.push({id: Date.now(), day: d, time: t, duration: duration, title: "הפסקה", isOther: false});
+        } else if(type === 'other') {
+            const title = document.getElementById('schOtherTitle').value || "אחר";
+            const duration = parseInt(document.getElementById('schOtherDuration').value) || 45;
+            breaks.push({id: Date.now(), day: d, time: t, duration: duration, title: title, isOther: true});
+        }
+        
+        saveToMemory(); 
+        renderWaitingList(); 
+        goBackFromAddSchedule(); 
+    }
+
+    function switchFinanceTab(tab) {
+        if(tab === 'income') { 
+            document.getElementById('tabIncome').style.background = 'var(--primary-color)'; document.getElementById('tabIncome').style.color = 'white'; 
+            document.getElementById('tabExpense').style.background = 'var(--card-bg)'; document.getElementById('tabExpense').style.color = 'var(--text-main)'; 
+            document.getElementById('financeIncomeView').style.display = 'block'; document.getElementById('financeExpenseView').style.display = 'none'; 
+        } else { 
+            document.getElementById('tabExpense').style.background = 'var(--primary-color)'; document.getElementById('tabExpense').style.color = 'white'; 
+            document.getElementById('tabIncome').style.background = 'var(--card-bg)'; document.getElementById('tabIncome').style.color = 'var(--text-main)'; 
+            document.getElementById('financeExpenseView').style.display = 'block'; document.getElementById('financeIncomeView').style.display = 'none'; 
+            document.getElementById('expDate').valueAsDate = new Date(); renderExpenses(); 
+        }
+    }
+    function toggleFinancePeriod() {
+        let t = document.getElementById('financePeriodType').value;
+        document.getElementById('financeMonth').style.display = t==='month'?'block':'none'; document.getElementById('financeYear').style.display = t==='year'?'block':'none'; renderFinances();
+    }
+    function toggleExpensePeriod() {
+        let t = document.getElementById('expensePeriodType').value;
+        document.getElementById('expenseMonth').style.display = t==='month'?'block':'none'; document.getElementById('expenseYear').style.display = t==='year'?'block':'none'; renderExpenses();
+    }
+    
+    function renderFinances() {
+        let t = document.getElementById('financePeriodType').value; let f = t==='month' ? document.getElementById('financeMonth').value : document.getElementById('financeYear').value;
+        if(!f) return; let totalSess=0; let totalInc=0; let totalDebt=0; 
+        
+        let sessList = [];
+        let debtList = [];
+        let incList = [];
+
+        patients.forEach((p,i) => {
+            let base = parseInt(p.basePrice) || 300; 
+            p.sessions.forEach(s => {
+                if(s.type !== 'הדרכה' && s.type !== 'אינטייק' && s.type !== 'שיחת הורים' && s.date.includes(f)) {
+                    let price = base; if(s.type==='אבחון') price=base*2.5; else if(s.type==='תצפית במסגרת חינוכית') price=base*1.5;
+                    let sessionInfo = { name: p.name, date: s.date, num: s.number || '-', paid: s.paid, phone: p.parentPhone1, price: price };
+                    sessList.push(sessionInfo);
+                    
+                    totalSess++; 
+                    if(s.paid) { 
+                        totalInc+=price; 
+                        incList.push(sessionInfo);
+                    } else { 
+                        totalDebt+=price; 
+                        debtList.push(sessionInfo); 
+                    }
+                }
+            });
+        });
+        
+        sessList.sort((a,b) => new Date(b.date) - new Date(a.date));
+        debtList.sort((a,b) => new Date(b.date) - new Date(a.date));
+        incList.sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        window.tempAccSess = sessList;
+        window.tempAccDebt = debtList;
+        window.tempAccInc = incList;
+
+        let debtBox = t==='month' ? `<div class="dash-card dash-alert dash-clickable" onclick="showAccModal('debt')"><span class="dash-val">₪${totalDebt}</span><span class="dash-lbl">חובות לתקופה</span></div>` : '';
+        document.getElementById('financeResults').innerHTML = `
+            <div class="dash-row">
+                <div class="dash-card dash-clickable" onclick="showAccModal('sess')"><span class="dash-val">${totalSess}</span><span class="dash-lbl">סה"כ טיפולים</span></div>
+                <div class="dash-card dash-clickable" style="background:#f0fdfa; border-color:var(--primary-color);" onclick="showAccModal('inc')"><span class="dash-val">₪${totalInc}</span><span class="dash-lbl">הכנסות בפועל</span></div>
+                ${debtBox}
+            </div>`;
+        
+        document.getElementById('patientsWithDebtContainer').innerHTML = ""; 
+        document.getElementById('patientsWithoutDebtContainer').innerHTML = ""; 
+    }
+
+    function showAccModal(type) {
+        let list = type === 'sess' ? window.tempAccSess : (type === 'debt' ? window.tempAccDebt : window.tempAccInc);
+        let title = type === 'sess' ? "📋 פירוט הטיפולים שבוצעו בתקופה זו" : (type === 'debt' ? "⚠️ פירוט החובות הפתוחים לתקופה זו" : "💰 פירוט הכנסות בפועל");
+        document.getElementById('accListTitle').innerText = title;
+        
+        let h = "";
+        if(!list || list.length === 0) {
+            h = "<p style='color:#64748b; text-align:center;'>אין נתונים להציג לתקופה זו.</p>";
+        } else {
+            list.forEach(i => {
+                let rightSide = "";
+                if(type === 'debt') {
+                    rightSide = `<button class="btn-wa btn-small" onclick="sendUnivRem('${i.name}','${i.phone}','wa', true)" style="margin:0;">💬 תזכורת</button>`;
+                } else if(type === 'inc') {
+                    rightSide = `<span style="font-weight:bold; color:var(--success); font-size:16px;">₪${i.price}</span>`;
+                }
+                
+                h += `
+                <div style="background:#fff; padding:12px; border-bottom:1px solid #e2e8f0; border-radius:8px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b style="color:var(--primary-color); font-size:16px;">${i.name}</b><br><small style="color:#64748b;">תאריך: ${i.date} | טיפול מספר: ${i.num}</small></div>
+                    ${rightSide}
+                </div>`;
+            });
+        }
+        document.getElementById('accListContainer').innerHTML = h;
+        document.getElementById('accountingListModal').style.display = 'block';
+    }
+
+    function handleExpenseImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader(); reader.onload = function (e) {
+                const img = new Image(); img.onload = function() {
+                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+                    tempExpenseImageBase64 = canvas.toDataURL('image/jpeg', 0.6); document.getElementById('expImgPreview').style.display = 'block';
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    function saveExpense() {
+        const date = document.getElementById('expDate').value; const desc = document.getElementById('expDesc').value; const amount = document.getElementById('expAmount').value;
+        if(!date || !desc || !amount) return alert("יש למלא תאריך, תיאור וסכום ההוצאה.");
+        expenses.push({date, desc, amount, img: tempExpenseImageBase64, id: Date.now()});
+        saveToMemory(); document.getElementById('expDesc').value=""; document.getElementById('expAmount').value=""; tempExpenseImageBase64=null; document.getElementById('expImage').value=""; document.getElementById('expImgPreview').style.display='none'; renderExpenses(); alert("הוצאה נשמרה!");
+    }
+    
+    function renderExpenses() {
+        let t = document.getElementById('expensePeriodType').value; let f = t==='month' ? document.getElementById('expenseMonth').value : document.getElementById('expenseYear').value;
+        if(!f) return;
+        const cont = document.getElementById('expensesListContainer'); cont.innerHTML = "";
+        let filtered = expenses.filter(ex => ex.date.includes(f));
+        
+        if(!filtered.length) { cont.innerHTML = "<p style='color:#94a3b8; text-align:center;'>אין הוצאות לתקופה זו.</p>"; return; }
+        filtered.sort((a,b)=>new Date(b.date) - new Date(a.date)).forEach(ex => {
+            let imgHtml = ex.img ? `<img src="${ex.img}" class="expense-img">` : '';
+            cont.innerHTML += `<details class="session-item" style="border-right-color:var(--secondary-color);"><summary style="color:var(--secondary-color); font-size:16px;">${ex.date} - ${ex.desc} <b style="float:left;">₪${ex.amount}</b></summary><div style="margin-top:10px; padding-top:10px; border-top:1px dashed #cbd5e1;"><button class="btn-subtle-delete" style="display:block; width:100%; text-align:center; margin-bottom:10px;" onclick="deleteExpense(${ex.id})">מחיקת הוצאה</button>${imgHtml}</div></details>`;
+        });
+    }
+    function deleteExpense(id) { if(confirm("למחוק שורת הוצאה זו?")) { expenses = expenses.filter(x=>x.id!==id); saveToMemory(); renderExpenses(); } }
+    
+    function renderWaitingList() {
+        let cont = document.getElementById('waitingListContainer');
+        if(!cont) return;
+        
+        let wl = patients.map((p, i) => ({...p, originalIndex: i}))
+                         .filter(p => !p.archived && (!p.weeklyDay && p.weeklyDay !== 0));
+        
+        cont.innerHTML = wl.length ? "" : "<li style='color:#64748b; font-size:14px; padding:10px; text-align:center;'>אין מטופלים ממתינים. כולם משובצים ביומן!</li>";
+        
+        wl.forEach(p => {
+            cont.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:8px; margin-bottom:5px; border:1px solid #cbd5e1;"><b style="color:var(--primary-color); font-size:16px;">${p.name}</b><button class="btn-success" style="font-size:13px; font-weight:bold; padding:8px 15px; margin:0; width:auto; border-radius:8px;" onclick="scheduleFromWaitingList(${p.originalIndex})">📅 שבץ</button></li>`;
+        });
+    }
+
+    function scheduleFromWaitingList(pIdx) {
+        currentDayView = -1;
+        showScreen('view-add-schedule');
+        setTimeout(() => {
+            let sel = document.getElementById('schedulePatientSelect');
+            if(sel) sel.value = pIdx;
+        }, 100);
+    }
+
+    window.onload = () => {
+        const savedTheme = localStorage.getItem('clinicTheme') || 'default';
+        applyTheme(savedTheme);
+        updateLogoDisplay();
+
+        let now = new Date();
+        let fY = document.getElementById('financeYear');
+        let eY = document.getElementById('expenseYear');
+        if(fY && fY.options.length === 0) {
+            for(let i = now.getFullYear() - 2; i <= now.getFullYear() + 2; i++) {
+                let sel = (i === now.getFullYear()) ? "selected" : "";
+                fY.innerHTML += `<option value="${i}" ${sel}>${i}</option>`;
+                eY.innerHTML += `<option value="${i}" ${sel}>${i}</option>`;
+            }
+        }
+        
+        checkLicenseStatus();
+        checkFirstTime(); 
+        
+        renderWaitingList();
+        showScreen('view-patients');
+    }
+</script>
+</body>
+</html>
