@@ -104,7 +104,6 @@
 </head>
 <body>
 
-<!-- מסך התקנון / כניסה ראשונית -->
 <div id="tosModal" class="modal" style="background: rgba(15, 23, 42, 0.95); z-index: 99999;">
     <div class="modal-content" style="text-align: center; border: 4px solid var(--primary-color); margin-top: 10%;">
         <h2 style="color: var(--primary-color); font-size: 26px; margin-bottom:15px;">ברוכים הבאים למערכת! 👋</h2>
@@ -129,7 +128,6 @@
     </div>
 </div>
 
-<!-- חלון בחירת פורמט הורדה -->
 <div id="exportModal" class="modal" style="z-index: 4000;">
     <div class="modal-content" style="max-width: 400px; text-align: center;">
         <h3 style="color:var(--primary-color); margin-bottom:5px;">📥 בחירת פורמט הורדה</h3>
@@ -140,7 +138,6 @@
     </div>
 </div>
 
-<!-- חלון מעבר בין מכשירים -->
 <div id="transferModal" class="modal" style="z-index: 9999;">
     <div class="modal-content" style="text-align: center;">
         <h2 style="color: var(--primary-color);">🔄 מעבר למכשיר אחר</h2>
@@ -206,7 +203,6 @@
         </div>
     </div>
 
-    <!-- התראת גיבוי מעודנת -->
     <div id="forcedBackupModal" class="modal" style="background: rgba(13, 148, 136, 0.95); z-index: 9999;">
         <div class="modal-content" style="text-align: center; border: 4px solid var(--secondary-color); margin-top: 5%;">
             <h2 style="color: var(--secondary-color); font-size: 24px;">💡 רגע לפני שמתחילים...</h2>
@@ -222,13 +218,11 @@
     <div class="container">
         <button onclick="openSettingsModal()" style="position: absolute; left: 15px; top: 15px; width: 45px; height: 45px; border-radius: 50%; background: #f1f5f9; color: #475569; padding: 0; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border:1px solid #cbd5e1; z-index: 100;">⚙️</button>
 
-        <!-- מיתוג נקי ללא לוגו אישי -->
         <div style="text-align: center; margin-bottom: 25px; padding-top: 15px;">
             <h1 style="color: var(--primary-color); margin: 0; font-size: 32px; font-weight: 900;">CliniKit</h1>
             <p style="color: var(--secondary-color); font-weight: bold; margin-top: 5px; margin-bottom: 0;">פשוט לנהל קליניקה</p>
         </div>
         
-        <!-- מסך מטופלים -->
         <div id="view-patients" class="view-screen active-screen">
             <div class="action-bar" style="margin-bottom:15px; justify-content:center;">
                 <button class="btn-raw" style="border-color:var(--primary-color); color:var(--primary-color); font-weight:bold; border-radius:15px; margin-top:0; width:100%;" onclick="openTransferModal()">🔄 גיבוי ומעבר למכשיר אחר</button>
@@ -248,7 +242,6 @@
             <button class="btn-raw" style="border-style:dashed; margin-top:20px; border-radius:15px; width:100%;" onclick="showScreen('view-archive')">🗄️ ארכיון מטופלים</button>
         </div>
 
-        <!-- מסך ארכיון -->
         <div id="view-archive" class="view-screen">
             <div class="action-bar">
                 <button class="btn-small btn-back" onclick="showScreen('view-patients')">🔙 חזרה לרשימת המטופלים</button>
@@ -258,7 +251,6 @@
             <div id="archivedPatientList"></div>
         </div>
 
-        <!-- מסך פרטי מטופל (ראשי) -->
         <div id="view-patient-detail" class="view-screen">
             <div class="action-bar" style="margin-bottom: 5px;">
                 <button class="btn-small btn-back" onclick="goBackToPatientsOrArchive()">🔙 חזרה לרשימת המטופלים</button>
@@ -296,7 +288,6 @@
                 <div class="patient-menu-card full-width" onclick="openSection('sec-next')"><span class="p-icon">💡</span><span class="p-text" style="font-size:16px;">תכנון הטיפול הבא</span></div>
             </div>
 
-            <!-- לשוניות מטופל -->
             <div id="sec-session" class="patient-section">
                 <button class="btn-small btn-back" style="margin-bottom:10px;" onclick="closeSection()">🔙 חזרה לתפריט התיק</button>
                 <div class="action-box" style="margin-top:0;">
@@ -608,6 +599,113 @@
             </div>
         </div>
 
+        <div id="addPatientModal" class="modal">
+            <div class="modal-content">
+                <h3>👥 רישום מטופל/ת חדש/ה</h3>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>שם פרטי (חובה):</h4><input type="text" id="newPatientFirstName"></div>
+                    <div style="flex:1;"><h4>שם משפחה (חובה):</h4><input type="text" id="newPatientLastName"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>ת.ז:</h4><input type="text" id="newPatientId"></div>
+                    <div style="flex:1;"><h4>תאריך לידה:</h4><input type="date" id="newPatientDob"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>טלפון הורה 1:</h4><input type="tel" id="newPatientPhone"></div>
+                    <div style="flex:1;"><h4>טלפון הורה 2:</h4><input type="tel" id="newPatientPhone2" placeholder="(אופציונלי)"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>מכסת טיפולים:</h4><input type="number" id="newPatientTotalSessions" placeholder="למשל 12"></div>
+                    <div style="flex:1;"><h4>אימייל:</h4><input type="email" id="newPatientEmail"></div>
+                </div>
+                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #cbd5e1;">
+                    <h4>תעריף קבוע למפגש (₪):</h4>
+                    <input type="number" id="newPatientBasePrice" value="300">
+                </div>
+                
+                <button class="btn-success" onclick="saveNewPatient(false)">💾 פתיחת תיק</button>
+                <button class="btn-primary" style="background:#0ea5e9; color:white; border-radius:18px; font-weight:bold; padding:15px; width:100%; margin-top:10px; border:none; cursor:pointer;" onclick="saveNewPatient(true)">📅 פתיחת תיק ומעבר לשיבוץ ביומן</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addPatientModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="manageDebtReceiptModal" class="modal">
+            <div class="modal-content">
+                <h3 style="color:var(--primary-color);">💰 ניהול חובות וקבלות</h3>
+                <p style="font-size:14px; margin-bottom:15px; color:#64748b;">סמני איזה מהמפגשים שולמו או שעבורם הופקה קבלה:</p>
+                <div id="manageDebtReceiptList" style="max-height:300px; overflow-y:auto; margin-bottom:15px;"></div>
+                
+                <div style="background:#f0fdfa; padding:15px; border-radius:10px; border:1px solid var(--primary-color); margin-bottom:15px;">
+                    <h4 style="margin:0 0 10px 0;">פעולות מהירות:</h4>
+                    <button class="btn-raw" style="margin-bottom:10px; padding:10px; background:white; font-size:14px;" onclick="copyMissingReceiptDates()">📋 העתק תאריכים שחסרה בהם קבלה</button>
+                    <button class="btn-success" style="margin:0; padding:10px; width:100%; font-size:14px; background:#0284c7; border-radius:12px;" onclick="openSavedReceiptWebsite()">🌐 מעבר לאתר חשבוניות / קבלות</button>
+                </div>
+                <button class="btn-success" onclick="saveDebtReceiptUpdates()">💾 שמור שינויים</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('manageDebtReceiptModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="debtReminderModal" class="modal">
+            <div class="modal-content">
+                <h3 style="color:#ea580c;">⚠️ דוח מצב חשבון פתוח</h3>
+                <div id="debtReminderContent" style="background:#fff7ed; padding:15px; border-radius:10px; font-size:15px; line-height:1.5; margin-bottom:15px; border:1px solid #fed7aa; white-space:pre-wrap;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-wa" style="flex:1; margin:0;" onclick="executeDebtReminder('wa')">💬 שליחה בווצאפ</button>
+                    <button class="btn-email btn-link-style" style="flex:1; margin:0;" onclick="executeDebtReminder('email')">📧 שליחה במייל</button>
+                </div>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('debtReminderModal')">ביטול</button>
+            </div>
+        </div>
+
+        <div id="addFolderModal" class="modal"><div class="modal-content"><h3>📁 תיקייה חדשה</h3><input type="text" id="newFolderName" placeholder="שם התיקייה"><button class="btn-success" onclick="createNewFolder()">שמור</button><button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addFolderModal')">ביטול</button></div></div>
+        
+        <div id="addExerciseModal" class="modal">
+            <div class="modal-content">
+                <h3 id="exModalTitle">➕ תרגיל חדש לבנק</h3>
+                <select id="exerciseFolderSelect"></select>
+                <input type="text" id="addExName" placeholder="שם התרגיל">
+                <textarea id="addExDesc" rows="3" placeholder="הסבר קצר..."></textarea>
+                <div class="cam-btn-wrap" style="margin-top:15px;">
+                    <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed;">📷 העלאת תמונה או צילום מהמכשיר</button>
+                    <input type="file" id="addExImage" accept="image/*" onchange="handleAddExerciseImageUpload(this)">
+                </div>
+                <div id="imgPreviewAddEx" style="height:80px; margin-top:10px; background-size:contain; background-repeat:no-repeat; background-position:center;"></div>
+                <button class="btn-success" onclick="saveExerciseToBank()">שמור לבנק</button>
+                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addExerciseModal')">ביטול</button>
+            </div>
+        </div>
+        
+        <div id="practiceModal" class="modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <h3>📝 בניית תוכנית תרגול</h3>
+                <p style="font-size:14px; font-weight:bold; color:var(--primary-color); margin-bottom:5px;">1. בחרי תרגילים מהבנק:</p>
+                <div id="practiceBankSelection" style="max-height:200px; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:10px; border:1px solid #cbd5e1;"></div>
+                <p style="font-size:14px; font-weight:bold; color:var(--primary-color); margin-top:20px; margin-bottom:5px;">2. או הוסיפי תרגיל ספציפי חדש (צלמי!):</p>
+                <div style="background:#fff; padding:15px; border-radius:15px; border:2px dashed var(--light-accent);">
+                    <input type="text" id="customExName" placeholder="שם התרגיל (למשל: בניית מגדל)" style="margin-top:0;">
+                    <textarea id="customExDesc" rows="2" placeholder="הסבר להורים..."></textarea>
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                        <div class="cam-btn-wrap" style="flex:1;">
+                            <button class="btn-success" style="pointer-events:none; margin:0; width:100%; padding:10px; font-size:14px;">📷 צלמי עכשיו</button>
+                            <input type="file" id="customExImage" accept="image/*" capture="environment" onchange="handleCustomImageUpload(this)">
+                        </div>
+                        <div id="imgPreviewCustom" style="width:40px; height:40px; border-radius:8px; border:1px solid #cbd5e1; background-size:cover; background-position:center; display:none;"></div>
+                    </div>
+                    <button class="btn-raw" style="margin-top:10px; padding:10px; border-color:var(--primary-color); color:var(--primary-color);" onclick="addCustomExerciseToProgram()">➕ הוסף לתוכנית</button>
+                </div>
+                <div style="background:#fffaf5; border-radius:15px; padding:15px; margin-top:20px; border:1px solid #fed7aa;">
+                    <h4 style="margin:0 0 10px 0; color:var(--secondary-color);">התרגילים שנבחרו לתוכנית:</h4>
+                    <ul id="selectedPracticeList" style="list-style:none; padding:0; margin:0; font-size:14px;"></ul>
+                    <button class="btn-success" style="margin-top:15px; background:#3b82f6;" onclick="showExportOptions('תכנית_תרגול', getPracticeHTML())">📥 הורדת קובץ תרגול לבית</button>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn-wa" style="flex:1; border-radius:15px; padding:12px; font-size:14px; margin:0;" onclick="sendPracticeTextWA()">💬 שליחת טקסט לווצאפ</button>
+                        <button class="btn-email btn-link-style" style="flex:1; border-radius:15px; padding:12px; font-size:14px; margin:0;" onclick="sendPracticeTextEmail()">📧 שליחת טקסט למייל</button>
+                    </div>
+                </div>
+                <button class="btn-raw" style="width:100%; margin-top:15px;" onclick="closeModal('practiceModal')">סגור</button>
+            </div>
+        </div>
+
         <div id="settingsModal" class="modal">
             <div class="modal-content">
                 <h3>⚙️ הגדרות, זמנים ומיתוג</h3>
@@ -641,7 +739,6 @@
             </div>
         </div>
 
-        <!-- תחתית האפליקציה: קרדיט קבוע -->
         <div style="text-align: center; padding: 20px; font-size: 13px; color: #94a3b8; margin-top: 30px; border-top: 1px dashed #e2e8f0; line-height: 1.5;" class="no-print">
             &copy; כל הזכויות שמורות לאסתר בן פורת | 054-6703332 | esterayelet@gmail.com <br>
             <small style="display:block; margin-top:5px; font-weight:bold;">אין להעתיק או להעביר תוכנה זו ללא אישור מפורש מהמפתחת.</small>
@@ -657,7 +754,6 @@
     </div> 
 </div> 
 
-<!-- סקריפט JavaScript - נקי ובדוק -->
 <script>
     const DAY_NAMES = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"];
 
@@ -1275,13 +1371,16 @@
                 </div>
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;"><h4>ת.ז:</h4><input type="text" id="newPatientId"></div>
-                    <div style="flex:1;"><h4>טלפון הורה 1:</h4><input type="tel" id="newPatientPhone"></div>
+                    <div style="flex:1;"><h4>תאריך לידה:</h4><input type="date" id="newPatientDob"></div>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><h4>תאריך לידה:</h4><input type="date" id="newPatientDob"></div>
-                    <div style="flex:1;"><h4>מכסת טיפולים (לא חובה):</h4><input type="number" id="newPatientTotalSessions" placeholder="למשל 12"></div>
+                    <div style="flex:1;"><h4>טלפון הורה 1:</h4><input type="tel" id="newPatientPhone"></div>
+                    <div style="flex:1;"><h4>טלפון הורה 2:</h4><input type="tel" id="newPatientPhone2" placeholder="(אופציונלי)"></div>
                 </div>
-                <h4>אימייל:</h4><input type="email" id="newPatientEmail">
+                <div style="display:flex; gap:10px;">
+                    <div style="flex:1;"><h4>מכסת טיפולים:</h4><input type="number" id="newPatientTotalSessions" placeholder="למשל 12"></div>
+                    <div style="flex:1;"><h4>אימייל:</h4><input type="email" id="newPatientEmail"></div>
+                </div>
                 <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #cbd5e1;">
                     <h4>תעריף קבוע למפגש (₪):</h4>
                     <input type="number" id="newPatientBasePrice" value="300">
@@ -1301,7 +1400,7 @@
 
         const fieldsToClear = [
             'newPatientFirstName', 'newPatientLastName', 'newPatientId', 
-            'newPatientDob', 'newPatientPhone', 'newPatientEmail', 'newPatientTotalSessions'
+            'newPatientDob', 'newPatientPhone', 'newPatientPhone2', 'newPatientEmail', 'newPatientTotalSessions'
         ];
         
         fieldsToClear.forEach(id => {
