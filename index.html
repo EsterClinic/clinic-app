@@ -811,75 +811,61 @@
 
     function exportToPDF(filename, htmlContent) {
         const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
-        const originalTitle = document.title;
-        document.title = filename; 
-        
-        let printArea = document.getElementById('clinicPrintArea');
-        if (!printArea) {
-            printArea = document.createElement('div');
-            printArea.id = 'clinicPrintArea';
-            document.body.appendChild(printArea);
-            
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @media print {
-                    body > *:not(#clinicPrintArea) { display: none !important; }
-                    #clinicPrintArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; direction:rtl; padding: 30px !important; box-sizing: border-box; }
-                    @page { margin: 25mm; }
-                }
-            `;
-            document.head.appendChild(style);
+        const fullHtml = `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>${filename}</title>
+<style>
+  body { font-family: 'Rubik', Arial, sans-serif; direction: rtl; text-align: right; margin: 0; padding: 70px 30px 30px 30px; color: #1e293b; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: right; }
+  th { background-color: #f1f5f9; font-weight: bold; color: ${pColor}; }
+  .finance-total-row { font-weight: bold; background: #f8fafc; }
+  .print-exercise-row { border-bottom: 1px dashed #cbd5e1; padding: 15px 0; display: flex; gap: 15px; align-items: flex-start; page-break-inside: avoid; }
+  .print-exercise-img { max-width: 150px; border-radius: 10px; border: 2px solid #cbd5e1; }
+  div, tr, li, p, blockquote { page-break-inside: avoid; }
+  h2, h3, h4 { page-break-after: avoid; margin-top: 20px; }
+  #topBar { position: fixed; top: 0; left: 0; right: 0; background: ${pColor}; color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px; z-index: 9999; font-family: 'Rubik', sans-serif; }
+  #topBar span { flex: 1; font-weight: bold; font-size: 15px; }
+  #topBar button { background: white; color: ${pColor}; border: none; padding: 8px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; font-family: 'Rubik', sans-serif; }
+  @media print { #topBar { display: none !important; } body { padding-top: 0; } @page { margin: 25mm; } }
+</style>
+</head>
+<body>
+<div id="topBar">
+  <span>📄 ${filename}</span>
+  <button onclick="window.print()">🖨️ הדפסה / שמירה כ-PDF</button>
+</div>
+${htmlContent}
+</body>
+</html>`;
+
+        const newWin = window.open('', '_blank');
+        if (newWin) {
+            newWin.document.open();
+            newWin.document.write(fullHtml);
+            newWin.document.close();
+        } else {
+            alert("הדפדפן חסם פתיחת חלון. אנא אפשרי חלונות קופצים לאתר זה ונסי שוב.");
         }
-        
-        printArea.innerHTML = `
-            <div dir="rtl" style="font-family: 'Rubik', Arial, sans-serif; color: #1e293b; padding: 20px;">
-                <style>
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: right; }
-                    th { background-color: #f1f5f9; font-weight: bold; color: ${pColor}; }
-                    .finance-total-row { font-weight: bold; background: #f8fafc; }
-                    .print-exercise-row { border-bottom: 1px dashed #cbd5e1; padding: 15px 0; display: flex; gap: 15px; justify-content: space-between; align-items: flex-start; page-break-inside: avoid; }
-                    .print-exercise-img { max-width: 150px; border-radius: 10px; border:2px solid #cbd5e1; }
-                    div, tr, li, p, blockquote { page-break-inside: avoid; }
-                    h2, h3, h4 { page-break-after: avoid; margin-top: 20px;}
-                </style>
-                ${htmlContent}
-            </div>
-        `;
-        
-        window.onafterprint = function() {
-            printArea.innerHTML = '';
-            document.title = originalTitle;
-            window.onafterprint = null;
-        };
-        
-        setTimeout(() => {
-            window.print();
-        }, 300);
     }
 
     function exportToWord(filename, htmlContent) {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            exportToPDF(filename, htmlContent);
+            return;
+        }
+
         const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
         const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>" + filename + "</title><style>body { font-family: Arial, sans-serif; direction: rtl; text-align: right; margin: 40px; padding: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 20px; } th, td { border: 1px solid #cbd5e1; padding: 12px; text-align: right; } th { background-color: #f1f5f9; font-weight: bold; color: " + pColor + "; }</style></head><body>";
         const postHtml = "</body></html>";
         const html = preHtml + htmlContent + postHtml;
 
-        const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        
-        try {
-            const file = new File([blob], filename + '.doc', { type: 'application/msword' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    files: [file],
-                    title: filename,
-                    text: 'מצורף הקובץ מ-CliniKit'
-                }).catch(e => {
-                    triggerDownload(blob, filename); 
-                });
-                return; 
-            }
-        } catch(e) {}
-
+        const blob = new Blob(['﻿', html], { type: 'application/msword' });
         triggerDownload(blob, filename);
     }
 
@@ -990,18 +976,36 @@
 
     function executeDailyBackup() {
         const allData = { patients, expenses, exerciseFolders, freeExercises, breaks, workingHours };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
         const dateStr = new Date().toLocaleDateString('he-IL').replace(/\./g, '-');
-        downloadAnchorNode.setAttribute("download", `גיבוי_CliniKit_${dateStr}.json`);
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+        const filename = `גיבוי_CliniKit_${dateStr}.json`;
+        const jsonString = JSON.stringify(allData);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
         localStorage.setItem('myLastBackupDate', new Date().toDateString());
-        
         const modal = document.getElementById('forcedBackupModal');
         if(modal) modal.style.display = 'none';
+
+        try {
+            const file = new File([blob], filename, { type: 'application/json' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: filename }).catch(() => {
+                    triggerJsonDownload(blob, filename);
+                });
+                return;
+            }
+        } catch(e) {}
+
+        triggerJsonDownload(blob, filename);
+    }
+
+    function triggerJsonDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
     }
 
     function restoreBackupFromFile(input) {
