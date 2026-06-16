@@ -709,29 +709,17 @@
         <div id="settingsModal" class="modal">
             <div class="modal-content">
                 <h3>⚙️ הגדרות, זמנים ומיתוג</h3>
-                
-                <h4 style="margin-top:15px; text-align:right;">🎨 עיצוב ומיתוג:</h4>
+                <h4 style="margin-top:15px; text-align:right;">🎨 עיצוב:</h4>
                 <div style="background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:15px;">
-                    <label style="font-weight:bold; display:block; margin-bottom:5px;">לוגו הקליניקה:</label>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <div class="cam-btn-wrap" style="flex:2;">
-                            <button class="btn-raw" style="pointer-events:none; margin:0; width:100%; border-style:dashed;">🖼️ העלאת לוגו חדש</button>
-                            <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
-                        </div>
-                        <button class="btn-subtle-delete" style="flex:1; margin:0;" onclick="removeLogo()">🗑️ הסרת לוגו</button>
-                    </div>
-                    
-                    <label style="font-weight:bold; display:block; margin-top:15px; margin-bottom:5px;">פלטת צבעים:</label>
+                    <label style="font-weight:bold; display:block; margin-bottom:5px;">פלטת צבעים:</label>
                    <select id="themeSelect" onchange="previewTheme()">
                         <option value="vibrant">הרמוניה תוססת (טורקיז, קורל וחרדל)</option>
                         <option value="default">פלטה גנרית (נקייה - טורקיז כהה ואפור)</option>
                         <option value="classic">ים תיכוני (כחול קלאסי, ירוק רענן)</option>
                         <option value="warm">אדמה חמימה (חמרה ומרווה)</option>
                         <option value="calm">פסטל מרגיע (סגול רך וורוד)</option>
-                        <option value="auto" id="autoThemeOption" style="display:none;">✨ צבעים אוטומטיים לפי הלוגו שהועלה</option>
                     </select>
                 </div>
-
                 <h4 style="margin-top:15px; text-align:right;">זמני עבודה:</h4>
                 <div id="wh-container"></div>
                 <button class="btn-success" onclick="saveSettings()">שמור הגדרות</button>
@@ -836,8 +824,8 @@
             style.innerHTML = `
                 @media print {
                     body > *:not(#clinicPrintArea) { display: none !important; }
-                    #clinicPrintArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; direction:rtl; }
-                    @page { margin: 20mm; }
+                    #clinicPrintArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; direction:rtl; padding: 30px !important; box-sizing: border-box; }
+                    @page { margin: 25mm; }
                 }
             `;
             document.head.appendChild(style);
@@ -927,10 +915,12 @@
         document.body.removeChild(a);
     }
 
-    function handleLogoUpload(input) {}
-    function removeLogo() {}
-    function updateLogoDisplay() {}
-    function getLogoHtmlForPrint() { return ''; }
+    function getLogoHtmlForPrint() {
+        return `<div style="margin-bottom:10px; text-align:center;">
+                    <h1 style="color:var(--primary-color); margin: 0; font-size: 28px; font-weight: 900;">CliniKit</h1>
+                    <span style="font-size:14px; color:#475569;">פשוט לנהל קליניקה</span>
+                </div>`;
+    }
 
     let patients = JSON.parse(localStorage.getItem('myPatientsData')) || [];
     let expenses = JSON.parse(localStorage.getItem('myExpensesData')) || [];
@@ -1359,45 +1349,6 @@
     }
     
     function openAddPatientModal() {
-        let modal = document.getElementById('addPatientModal');
-        
-        if (!modal) {
-            const modalHTML = `
-            <div class="modal-content">
-                <h3>👥 רישום מטופל/ת חדש/ה</h3>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><h4>שם פרטי (חובה):</h4><input type="text" id="newPatientFirstName"></div>
-                    <div style="flex:1;"><h4>שם משפחה (חובה):</h4><input type="text" id="newPatientLastName"></div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><h4>ת.ז:</h4><input type="text" id="newPatientId"></div>
-                    <div style="flex:1;"><h4>תאריך לידה:</h4><input type="date" id="newPatientDob"></div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><h4>טלפון הורה 1:</h4><input type="tel" id="newPatientPhone"></div>
-                    <div style="flex:1;"><h4>טלפון הורה 2:</h4><input type="tel" id="newPatientPhone2" placeholder="(אופציונלי)"></div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><h4>מכסת טיפולים:</h4><input type="number" id="newPatientTotalSessions" placeholder="למשל 12"></div>
-                    <div style="flex:1;"><h4>אימייל:</h4><input type="email" id="newPatientEmail"></div>
-                </div>
-                <div style="margin-top:10px; padding-top:10px; border-top:1px dashed #cbd5e1;">
-                    <h4>תעריף קבוע למפגש (₪):</h4>
-                    <input type="number" id="newPatientBasePrice" value="300">
-                </div>
-                
-                <button class="btn-success" onclick="saveNewPatient(false)">💾 פתיחת תיק</button>
-                <button class="btn-primary" style="background:#0ea5e9; color:white; border-radius:18px; font-weight:bold; padding:15px; width:100%; margin-top:10px; border:none; cursor:pointer;" onclick="saveNewPatient(true)">📅 פתיחת תיק ומעבר לשיבוץ ביומן</button>
-                <button class="btn-raw" style="width:100%; margin-top:10px;" onclick="closeModal('addPatientModal')">ביטול</button>
-            </div>`;
-            
-            modal = document.createElement('div');
-            modal.id = 'addPatientModal';
-            modal.className = 'modal';
-            modal.innerHTML = modalHTML;
-            document.body.appendChild(modal);
-        }
-
         const fieldsToClear = [
             'newPatientFirstName', 'newPatientLastName', 'newPatientId', 
             'newPatientDob', 'newPatientPhone', 'newPatientPhone2', 'newPatientEmail', 'newPatientTotalSessions'
@@ -1411,7 +1362,7 @@
         const priceEl = document.getElementById('newPatientBasePrice');
         if (priceEl) priceEl.value = "300";
 
-        modal.style.display = 'block';
+        document.getElementById('addPatientModal').style.display = 'block';
     }
 
     function saveNewPatient(goToSchedule) {
@@ -1447,9 +1398,7 @@
         });
         
         saveToMemory(); 
-        
-        document.querySelectorAll('#addPatientModal').forEach(m => m.style.display = 'none'); 
-        
+        closeModal('addPatientModal');
         renderWaitingList(); 
         
         if(goToSchedule) {
@@ -1703,7 +1652,12 @@
     }
 
     function getPracticeHTML() {
-        let h = ``;
+        const pColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#3a7d8c';
+        let h = `<div style="text-align:center; border-bottom:2px solid ${pColor}; padding-bottom:15px; margin-bottom:20px;">
+                    ${getLogoHtmlForPrint()}
+                    <h2 style="color:${pColor}; margin:10px 0;">תוכנית תרגול לבית</h2>
+                    <h3 style="margin:5px 0;">עבור: ${patients[currentPatientIndex].name}</h3>
+                 </div>`;
         selectedExercisesForPrint.forEach((ex, i) => {
             let img = ex.img ? `<img src="${ex.img}" class="print-exercise-img">` : '';
             h += `<div class="print-exercise-row"><div style="flex:1;"><h3 style="margin:0 0 8px 0; font-size:18px;">${i+1}. ${ex.name}</h3><p style="margin:0; font-size:15px; line-height:1.4; white-space:pre-wrap;">${ex.desc}</p></div>${img}</div>`;
@@ -1768,7 +1722,7 @@
         
         document.getElementById('sessionNumber').value = nextNum;
         document.getElementById('sessionNotes').value = ""; 
-        document.getElementById('sessionPaid').checked = false; 
+        document.getElementById('sessionPaid').checked = false;
         document.getElementById('sessionReceipt').checked = false;
         document.getElementById('sessionType').value = "טיפול"; 
         
@@ -1788,6 +1742,9 @@
             document.getElementById('receiptWebsiteCustomUrl').style.display = "none";
             document.getElementById('receiptWebsiteCustomUrl').value = "";
         }
+
+        let now = new Date();
+        document.getElementById('reportMonthSelect').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 
         checkExpensiveSession();
         updateSessionQuotaInView();
@@ -2224,7 +2181,7 @@
             workingHours[i].location = document.getElementById(`whL_${i}`).value; 
             workingHours[i].start = document.getElementById(`whS_${i}`).value; workingHours[i].end = document.getElementById(`whE_${i}`).value;
         }
-        saveToMemory(); closeModal('settingsModal'); renderDaysGrid(); applyTheme(localStorage.getItem('clinicTheme') || 'vibrant'); alert("ההגדרות והמיתוג נשמרו בהצלחה!");
+        saveToMemory(); closeModal('settingsModal'); renderDaysGrid(); applyTheme(localStorage.getItem('clinicTheme') || 'vibrant'); alert("ההגדרות נשמרו בהצלחה!");
     }
     
     function renderDaysGrid() {
