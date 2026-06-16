@@ -224,12 +224,13 @@
     <div class="container">
         <button onclick="openSettingsModal()" style="position: absolute; left: 15px; top: 15px; width: 45px; height: 45px; border-radius: 50%; background: #f1f5f9; color: #475569; padding: 0; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border:1px solid #cbd5e1; z-index: 100;">⚙️</button>
 
- <div style="text-align: center; margin-bottom: 15px; padding-top: 10px; position: relative; min-height: 100px; display: flex; flex-direction: column; justify-content: center;">
-            <img id="mainLogo" src="" alt="לוגו הקליניקה" style="position: absolute; right: 0; top: 10px; max-height: 90px; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); display:none; z-index: 1; pointer-events: none;">
-            
-            <h1 style="color: var(--primary-color); margin: 0; font-size: 32px; font-weight: 900; position: relative; z-index: 2; pointer-events: none;">CliniKit</h1>
-            <p style="color: var(--secondary-color); font-weight: bold; margin-top: 5px; margin-bottom: 0; position: relative; z-index: 2; pointer-events: none;">פשוט לנהל קליניקה</p>
-        </div>
+<div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 15px; padding-top: 10px;">
+    <img id="mainLogo" src="" alt="לוגו" style="max-height: 90px; width: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05)); display:none; margin-bottom: 10px;">
+    <div>
+        <h1 style="color: var(--primary-color); margin: 0; font-size: 32px; font-weight: 900;">CliniKit</h1>
+        <p style="color: var(--secondary-color); font-weight: bold; margin-top: 5px; margin-bottom: 0;">פשוט לנהל קליניקה</p>
+    </div>
+</div>
         
         <!-- מסך מטופלים -->
         <div id="view-patients" class="view-screen active-screen">
@@ -1839,6 +1840,13 @@
         const currentNotes = document.getElementById('sessionNotes').value;
         document.getElementById('sessionNotes').value = (currentNotes ? currentNotes + "\n\n" : "") + "מתכנון הטיפול:\n" + p.nextPlan;
         p.nextPlan = ""; saveToMemory(); document.getElementById('nextPlanAlert').style.display = 'none'; openSection('sec-session');
+        // הוספת השורות האלו לפני פעולת השמירה או בסופה:
+    if (isDictating) {
+        isDictating = false;
+        if (activeRecognition) { activeRecognition.stop(); }
+        const btnVoice = document.getElementById('btnVoice');
+        if (btnVoice) { btnVoice.innerHTML = "🎤 הקלטה קולית"; btnVoice.style.color = "#0284c7"; }
+    }
     }
 
     function archivePatient() { if(confirm("לסיים סדרת טיפולים ולהעביר את התיק לארכיון?")) { patients[currentPatientIndex].archived = true; patients[currentPatientIndex].weeklyDay = null; saveToMemory(); renderWaitingList(); showScreen('view-patients'); } }
@@ -1889,6 +1897,13 @@
         } else {
             openPatient(currentPatientIndex); openSection('sec-history');
         }
+        // הוספת השורות האלו לפני פעולת השמירה או בסופה:
+    if (isDictating) {
+        isDictating = false;
+        if (activeRecognition) { activeRecognition.stop(); }
+        const btnVoice = document.getElementById('btnVoice');
+        if (btnVoice) { btnVoice.innerHTML = "🎤 הקלטה קולית"; btnVoice.style.color = "#0284c7"; }
+    }
     }
     
     let editingSessionIndex = -1;
